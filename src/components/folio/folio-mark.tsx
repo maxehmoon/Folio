@@ -1,0 +1,21 @@
+import type { SVGProps } from "react";
+
+export function FolioMark({
+  className,
+  ...props
+}: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="currentColor"
+      focusable="false"
+      viewBox="0 0 480 584"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M78 70 456 5c12-2 21 9 18 22l-25 130c-2 12-11 20-23 22l-258 9c-8 1-14 7-14 15v29c0 9-5 16-13 19l-93 27V108c0-19 12-34 30-38Z" />
+      <path d="M356 214c10-2 17 7 14 17l-17 69c-3 10-11 17-21 18l-164 14c-8 1-12 7-12 15v145c0 11-5 20-14 26l-96 60c-19 12-42-2-42-24V326c0-17 11-30 28-34l324-78Z" />
+    </svg>
+  );
+}
