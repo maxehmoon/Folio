@@ -27,6 +27,7 @@ function fieldsFrom(formData: FormData): CustomerFormValues {
 
   return {
     name: text("name"),
+    billing_name: text("billing_name"),
     contact_name: text("contact_name"),
     email: text("email"),
     phone: text("phone"),
@@ -48,6 +49,7 @@ function updateFields(
 ): CustomerUpdate {
   return {
     name: input.name,
+    billing_name: input.billing_name,
     contact_name: input.contact_name,
     email: input.email,
     phone: input.phone,

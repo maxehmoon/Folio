@@ -19,6 +19,7 @@ import {
   deletePaymentAction,
   recordPaymentAction,
 } from "@/features/payments/actions";
+import { getInvoiceOverview } from "@/features/invoices/queries";
 import { DeletePaymentDialog } from "@/features/payments/delete-payment-dialog";
 import { PaymentDialog } from "@/features/payments/payment-dialog";
 import {
@@ -53,9 +54,10 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const [business, params] = await Promise.all([requireBusiness(), searchParams]);
   const page = parsePage(first(params.page));
   const today = todayInTimeZone(business.timezone);
-  const [result, payableInvoices] = await Promise.all([
+  const [result, payableInvoices, overview] = await Promise.all([
     listPayments(business.id, page, business.currency, today),
     listPayableInvoices(business.id, today),
+    getInvoiceOverview(business.id, business.currency, today),
   ]);
   const payments = result.payments;
   const paymentKey = `${result.total}-${payableInvoices.map((invoice) => `${invoice.id}:${invoice.balanceDueCents}`).join("|")}`;
@@ -68,13 +70,6 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const lastPayment = firstPayment
     ? Math.min(firstPayment + payments.length - 1, result.total)
     : 0;
-  const outstandingCents = payableInvoices.reduce(
-    (total, invoice) =>
-      invoice.currency === business.currency
-        ? total + invoice.balanceDueCents
-        : total,
-    0,
-  );
 
   return (
     <div className="w-full space-y-7">
@@ -102,16 +97,30 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             <span className="text-subtle-foreground">All recorded receipts</span>
             <span className="font-medium text-foreground">{formatMoney(result.summary.totalCents, business.currency)}</span>
           </div>
+          {result.summary.missingConversionCount > 0 ? (
+            <p className="mt-2 text-[12px] text-muted-foreground">
+              Excludes {result.summary.missingConversionCount}{" "}
+              {result.summary.missingConversionCount === 1 ? "receipt" : "receipts"}
+              {" "}without a usable exchange rate.
+            </p>
+          ) : null}
         </div>
         <div className="bg-inverse p-5 text-inverse-foreground">
           <p className="text-[13px] text-inverse-foreground/60">Still available to collect</p>
           <p className="mt-3 text-[24px] font-medium leading-7">
-            {formatMoney(outstandingCents, business.currency)}
+            {formatMoney(overview.amountDueCents, business.currency)}
           </p>
           <div className="mt-4 flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-[12px]">
             <span className="text-inverse-foreground/55">Outstanding invoices</span>
-            <span className="font-medium">{payableInvoices.length}</span>
+            <span className="font-medium">{overview.issuedCount - overview.paidCount}</span>
           </div>
+          {overview.unconvertedAmountDueCount > 0 ? (
+            <p className="mt-2 text-[12px] text-inverse-foreground/55">
+              Excludes {overview.unconvertedAmountDueCount}{" "}
+              {overview.unconvertedAmountDueCount === 1 ? "invoice" : "invoices"}
+              {" "}without a usable exchange rate.
+            </p>
+          ) : null}
         </div>
       </section>
 

@@ -60,6 +60,7 @@ export type InvoiceEditorInitialValues = {
   currency: string;
   issueDate: string;
   dueDate: string;
+  exchangeRate: string;
   notes: string;
   paymentInstructions: string;
   lines: InvoiceEditorLine[];

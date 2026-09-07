@@ -7,6 +7,7 @@ const MAX_DATABASE_INTEGER = 2_147_483_647;
 export type SubmittedInvoiceLine = {
   itemId: string | null;
   description: string;
+  details: string | null;
   unit: string;
   quantityThousandths: number;
   unitPriceCents: number;
@@ -121,9 +122,10 @@ export function parseSubmittedInvoiceLines(
       itemId: optionalText(values.itemId, "Item", 100),
       description: requiredText(
         values.description,
-        `Line ${index + 1} description`,
+        `Line ${index + 1} item name`,
         500,
       ),
+      details: optionalText(values.details, `Line ${index + 1} description`, 5_000),
       unit: requiredText(values.unit, `Line ${index + 1} unit`, 40),
       quantityThousandths,
       unitPriceCents: parseLineDecimal(

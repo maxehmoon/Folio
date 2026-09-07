@@ -61,12 +61,14 @@ function customerListQuery(businessId: string, filters: CustomerListFilters) {
       getDatabaseDialect() === "postgres"
         ? sql<boolean>`(
             coalesce(${sql.ref("customers.name")}, '') ilike ${pattern} escape '!'
+            or coalesce(${sql.ref("customers.billing_name")}, '') ilike ${pattern} escape '!'
             or coalesce(${sql.ref("customers.contact_name")}, '') ilike ${pattern} escape '!'
             or coalesce(${sql.ref("customers.email")}, '') ilike ${pattern} escape '!'
             or coalesce(${sql.ref("customers.phone")}, '') ilike ${pattern} escape '!'
           )`
         : sql<boolean>`(
             coalesce(${sql.ref("customers.name")}, '') like ${pattern} escape '!'
+            or coalesce(${sql.ref("customers.billing_name")}, '') like ${pattern} escape '!'
             or coalesce(${sql.ref("customers.contact_name")}, '') like ${pattern} escape '!'
             or coalesce(${sql.ref("customers.email")}, '') like ${pattern} escape '!'
             or coalesce(${sql.ref("customers.phone")}, '') like ${pattern} escape '!'

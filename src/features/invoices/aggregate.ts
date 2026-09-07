@@ -15,6 +15,7 @@ import { buildInvoiceSellerSnapshot } from "./seller-snapshot";
 export type InvoiceAggregateLineInput = {
   itemId: string | null;
   description: string;
+  details?: string | null;
   unit: string;
   quantityThousandths: number;
   unitPriceCents: number;
@@ -91,6 +92,7 @@ export function prepareInvoiceAggregate(
     exchange_rate_source: input.exchangeRate.source,
     ...buildInvoiceSellerSnapshot(input.business),
     customer_name: input.customer.name,
+    customer_billing_name: input.customer.billing_name ?? null,
     customer_email: input.customer.email,
     customer_phone: input.customer.phone,
     customer_tax_id: input.customer.tax_id,
@@ -120,6 +122,7 @@ export function prepareInvoiceAggregate(
       item_id: line.itemId,
       position,
       description: line.description,
+      details: line.details ?? null,
       unit: line.unit,
       quantity_thousandths: line.quantityThousandths,
       unit_price_cents: line.unitPriceCents,
@@ -163,6 +166,7 @@ export async function replaceDraftInvoiceAggregate(
       seller_tax_id: invoice.seller_tax_id,
       seller_address: invoice.seller_address,
       customer_name: invoice.customer_name,
+      customer_billing_name: invoice.customer_billing_name,
       customer_email: invoice.customer_email,
       customer_phone: invoice.customer_phone,
       customer_tax_id: invoice.customer_tax_id,

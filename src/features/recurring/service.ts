@@ -269,6 +269,7 @@ async function processDueOccurrence(
         lines: recurringLines.map((line) => ({
           itemId: line.item_id,
           description: line.description,
+          details: line.details,
           unit: line.unit,
           quantityThousandths: line.quantity_thousandths,
           unitPriceCents: line.unit_price_cents,

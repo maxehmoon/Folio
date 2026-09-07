@@ -298,7 +298,7 @@ export function RecurringEditor({
                       className="text-[12px] text-muted-foreground"
                       htmlFor={`${prefix}-description`}
                     >
-                      Description
+                      Item name
                     </Label>
                     <Input
                       id={`${prefix}-description`}
@@ -308,6 +308,21 @@ export function RecurringEditor({
                       }
                       required
                       value={line.description}
+                    />
+                    <Label
+                      className="pt-2 text-[12px] text-muted-foreground"
+                      htmlFor={`${prefix}-details`}
+                    >
+                      Description (optional)
+                    </Label>
+                    <Textarea
+                      id={`${prefix}-details`}
+                      maxLength={5_000}
+                      onChange={(event) =>
+                        updateLine(line.key, { details: event.target.value })
+                      }
+                      rows={3}
+                      value={line.details ?? ""}
                     />
                   </div>
                   <div className="space-y-1.5 lg:col-span-2">

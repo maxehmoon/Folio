@@ -539,6 +539,26 @@ const domainMigrationProvider = {
           `.execute(database);
         },
       },
+      "202609070001_invoice_billing_names_and_line_details": {
+        async up(database) {
+          await database.schema
+            .alterTable("customers")
+            .addColumn("billing_name", "text")
+            .execute();
+          await database.schema
+            .alterTable("invoices")
+            .addColumn("customer_billing_name", "text")
+            .execute();
+          await database.schema
+            .alterTable("invoice_lines")
+            .addColumn("details", "text")
+            .execute();
+          await database.schema
+            .alterTable("recurring_invoice_lines")
+            .addColumn("details", "text")
+            .execute();
+        },
+      },
     };
   },
 };

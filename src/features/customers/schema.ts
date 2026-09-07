@@ -45,6 +45,7 @@ export const customerSchema = z.object({
     .trim()
     .min(1, "Enter a customer name.")
     .max(160, "Keep the customer name under 160 characters."),
+  billing_name: optionalText(160).default(null),
   contact_name: optionalText(160),
   email: optionalEmail,
   phone: optionalText(40),

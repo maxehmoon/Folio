@@ -53,6 +53,12 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
           currency: detail.invoice.currency,
           issueDate: detail.invoice.issue_date ?? "",
           dueDate: detail.invoice.due_date ?? "",
+          exchangeRate:
+            detail.invoice.exchange_rate_source === "Manual" &&
+            detail.invoice.base_currency === business.currency &&
+            detail.invoice.exchange_rate_micros !== null
+              ? inputDecimal(detail.invoice.exchange_rate_micros, 1_000_000, 6)
+              : "",
           notes: detail.invoice.notes ?? "",
           paymentInstructions: detail.invoice.payment_instructions ?? "",
           lines: detail.lines.map((line) => ({
@@ -60,6 +66,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
             itemId:
               line.item_id && activeItemIds.has(line.item_id) ? line.item_id : null,
             description: line.description,
+            details: line.details ?? "",
             unit: line.unit,
             quantity: formatQuantity(line.quantity_thousandths),
             unitPrice: (line.unit_price_cents / 100).toFixed(2),

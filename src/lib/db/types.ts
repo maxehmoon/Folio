@@ -115,6 +115,11 @@ export interface CustomersTable {
   id: string;
   business_id: string;
   name: string;
+  billing_name: ColumnType<
+    string | null,
+    string | null | undefined,
+    string | null
+  >;
   avatar_data_url: ColumnType<
     string | null,
     string | null | undefined,
@@ -181,6 +186,7 @@ export interface RecurringInvoiceLinesTable {
   item_id: string | null;
   position: number;
   description: string;
+  details: ColumnType<string | null, string | null | undefined, string | null>;
   unit: string;
   quantity_thousandths: number;
   unit_price_cents: number;
@@ -230,6 +236,11 @@ export interface InvoicesTable {
   seller_tax_id: string | null;
   seller_address: string | null;
   customer_name: string;
+  customer_billing_name: ColumnType<
+    string | null,
+    string | null | undefined,
+    string | null
+  >;
   customer_email: string | null;
   customer_phone: ColumnType<
     string | null,
@@ -259,6 +270,7 @@ export interface InvoiceLinesTable {
   item_id: string | null;
   position: number;
   description: string;
+  details: ColumnType<string | null, string | null | undefined, string | null>;
   unit: string;
   quantity_thousandths: number;
   unit_price_cents: number;
@@ -338,7 +350,9 @@ export interface Database {
 export type Business = Selectable<BusinessesTable>;
 export type NewBusiness = Insertable<BusinessesTable>;
 export type BusinessUpdate = Updateable<BusinessesTable>;
-export type Customer = Selectable<CustomersTable>;
+export type Customer = Omit<Selectable<CustomersTable>, "billing_name"> & {
+  billing_name?: string | null;
+};
 export type NewCustomer = Insertable<CustomersTable>;
 export type CustomerUpdate = Updateable<CustomersTable>;
 export type Item = Selectable<ItemsTable>;

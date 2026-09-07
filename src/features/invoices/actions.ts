@@ -21,7 +21,7 @@ import { db, newId, nowIso, type Business } from "@/lib/db";
 import { allocateInvoiceNumber } from "@/lib/db/businesses";
 import { getExchangeRate } from "@/lib/exchange-rates";
 import { todayInTimeZone } from "@/lib/format";
-import { addPaymentTerms } from "@/lib/finance";
+import { addPaymentTerms, convertCents } from "@/lib/finance";
 import { requireBusiness } from "@/lib/session";
 
 function readId(formData: FormData, name: string) {
@@ -63,6 +63,24 @@ async function resolveDraftRelations(
 }
 
 async function exchangeSnapshot(business: Business, input: SubmittedInvoice) {
+  if (input.exchangeRateMicros !== null) {
+    if (
+      input.currency === business.currency &&
+      input.exchangeRateMicros !== 1_000_000
+    ) {
+      throw new FormSubmissionError(
+        "The reporting exchange rate must be 1 for your business currency",
+      );
+    }
+    return {
+      base: input.currency,
+      quote: business.currency,
+      rateMicros: input.exchangeRateMicros,
+      date: input.issueDate ?? todayInTimeZone(business.timezone),
+      source: "Manual",
+    };
+  }
+
   try {
     return await getExchangeRate(
       input.currency,
@@ -97,8 +115,9 @@ function prepareDraftAggregate({
   input: SubmittedInvoice;
   timestamp: string;
 }) {
+  let aggregate;
   try {
-    return prepareInvoiceAggregate(
+    aggregate = prepareInvoiceAggregate(
       {
         id,
         business,
@@ -125,6 +144,18 @@ function prepareDraftAggregate({
     }
     throw error;
   }
+
+  try {
+    convertCents(aggregate.invoice.total_cents, exchangeRate.rateMicros);
+  } catch (error) {
+    if (error instanceof RangeError) {
+      throw new FormSubmissionError(
+        "The reporting exchange rate makes the invoice total too large",
+      );
+    }
+    throw error;
+  }
+  return aggregate;
 }
 
 export async function createInvoiceAction(
@@ -232,7 +263,17 @@ export async function issueInvoiceAction(formData: FormData) {
 
   const invoice = await db
     .selectFrom("invoices")
-    .select(["id", "lifecycle", "issue_date", "due_date", "currency"])
+    .select([
+      "id",
+      "lifecycle",
+      "issue_date",
+      "due_date",
+      "currency",
+      "base_currency",
+      "exchange_rate_micros",
+      "exchange_rate_date",
+      "exchange_rate_source",
+    ])
     .where("id", "=", invoiceId)
     .where("business_id", "=", business.id)
     .executeTakeFirst();
@@ -244,17 +285,36 @@ export async function issueInvoiceAction(formData: FormData) {
   const issueDate = invoice.issue_date ?? todayInTimeZone(business.timezone);
   const dueDate =
     invoice.due_date ?? addPaymentTerms(issueDate, business.default_payment_terms_days);
-  let exchangeRate;
-  try {
-    exchangeRate = await getExchangeRate(
-      invoice.currency,
-      business.currency,
-      issueDate,
-    );
-  } catch {
-    throw new FormSubmissionError(
-      "The reference exchange rate is unavailable. Try issuing again shortly.",
-    );
+  let exchangeRate: InvoiceExchangeSnapshot;
+  if (invoice.exchange_rate_source === "Manual") {
+    if (
+      invoice.base_currency !== business.currency ||
+      !invoice.exchange_rate_micros ||
+      !invoice.exchange_rate_date
+    ) {
+      throw new FormSubmissionError(
+        "Edit the draft to confirm its reporting exchange rate before issuing",
+      );
+    }
+    exchangeRate = {
+      base: invoice.currency,
+      quote: invoice.base_currency,
+      rateMicros: invoice.exchange_rate_micros,
+      date: invoice.exchange_rate_date,
+      source: invoice.exchange_rate_source,
+    };
+  } else {
+    try {
+      exchangeRate = await getExchangeRate(
+        invoice.currency,
+        business.currency,
+        issueDate,
+      );
+    } catch {
+      throw new FormSubmissionError(
+        "The reference exchange rate is unavailable. Try issuing again shortly.",
+      );
+    }
   }
 
   await db.transaction().execute(async (transaction) => {

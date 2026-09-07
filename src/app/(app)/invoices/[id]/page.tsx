@@ -281,7 +281,9 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
                     )}
                   </dd>
                   <dd className="mt-1 text-[12px] leading-5 text-subtle-foreground">
-                    {invoice.exchange_rate_source} reference rate
+                    {invoice.exchange_rate_source === "Manual"
+                      ? "Manual reporting rate"
+                      : `${invoice.exchange_rate_source} reference rate`}
                     {invoice.exchange_rate_date
                       ? ` · ${formatDate(invoice.exchange_rate_date)}`
                       : ""}
