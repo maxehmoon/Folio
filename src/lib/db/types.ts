@@ -235,6 +235,11 @@ export interface InvoicesTable {
   >;
   seller_tax_id: string | null;
   seller_address: string | null;
+  seller_country_code: ColumnType<
+    string | null,
+    string | null | undefined,
+    string | null
+  >;
   customer_name: string;
   customer_billing_name: ColumnType<
     string | null,
@@ -249,6 +254,11 @@ export interface InvoicesTable {
   >;
   customer_tax_id: string | null;
   customer_address: string | null;
+  customer_country_code: ColumnType<
+    string | null,
+    string | null | undefined,
+    string | null
+  >;
   notes: string | null;
   payment_instructions: string | null;
   invoice_footer: ColumnType<

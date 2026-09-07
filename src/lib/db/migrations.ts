@@ -559,6 +559,46 @@ const domainMigrationProvider = {
             .execute();
         },
       },
+      "202609070001_invoice_country_snapshot": {
+        async up(database) {
+          // Existing address strings cannot reliably identify a country.
+          await database.schema
+            .alterTable("invoices")
+            .addColumn("seller_country_code", "text")
+            .execute();
+          await database.schema
+            .alterTable("invoices")
+            .addColumn("customer_country_code", "text")
+            .execute();
+        },
+        async down(database) {
+          // Restore the legacy address format before removing the metadata.
+          await sql`
+            update invoices
+            set seller_address = case
+                  when seller_address is null then seller_country_code
+                  else seller_address || ${"\n"} || seller_country_code
+                end
+            where seller_country_code is not null
+          `.execute(database);
+          await sql`
+            update invoices
+            set customer_address = case
+                  when customer_address is null then customer_country_code
+                  else customer_address || ${"\n"} || customer_country_code
+                end
+            where customer_country_code is not null
+          `.execute(database);
+          await database.schema
+            .alterTable("invoices")
+            .dropColumn("customer_country_code")
+            .execute();
+          await database.schema
+            .alterTable("invoices")
+            .dropColumn("seller_country_code")
+            .execute();
+        },
+      },
     };
   },
 };

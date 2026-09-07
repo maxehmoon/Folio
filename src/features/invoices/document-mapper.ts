@@ -1,12 +1,19 @@
+import { countryName } from "@/lib/countries";
+
 import { invoiceStatusLabel } from "./calculations";
 import type { InvoiceDocumentData } from "./document-data";
 import type { InvoiceDetail } from "./types";
 
-function splitAddress(address: string | null) {
-  return (address ?? "")
+function splitAddress(address: string | null, countryCode: string | null) {
+  const lines = (address ?? "")
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
+
+  // Legacy snapshots have no country metadata; preserve their address lines.
+  const country = countryName(countryCode);
+  if (country) lines.push(country);
+  return lines;
 }
 
 function paymentDetailText(value: string) {
@@ -56,14 +63,14 @@ export function buildInvoiceDocumentData(
     currency: invoice.currency,
     seller: {
       name: invoice.seller_name,
-      address: splitAddress(invoice.seller_address),
+      address: splitAddress(invoice.seller_address, invoice.seller_country_code),
       ...(invoice.seller_email ? { email: invoice.seller_email } : {}),
       ...(invoice.seller_phone ? { phone: invoice.seller_phone } : {}),
       ...(invoice.seller_tax_id ? { taxId: invoice.seller_tax_id } : {}),
     },
     customer: {
       name: invoice.customer_billing_name ?? invoice.customer_name,
-      address: splitAddress(invoice.customer_address),
+      address: splitAddress(invoice.customer_address, invoice.customer_country_code),
       ...(invoice.customer_email ? { email: invoice.customer_email } : {}),
       ...(invoice.customer_phone ? { phone: invoice.customer_phone } : {}),
       ...(invoice.customer_tax_id ? { taxId: invoice.customer_tax_id } : {}),

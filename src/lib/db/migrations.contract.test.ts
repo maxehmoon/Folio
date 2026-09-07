@@ -51,6 +51,8 @@ async function expectCurrentSchema(database: DatabaseModule): Promise<void> {
       "exchange_rate_date",
       "exchange_rate_micros",
       "exchange_rate_source",
+      "seller_country_code",
+      "customer_country_code",
     ]),
   );
 }

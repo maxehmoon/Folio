@@ -7,6 +7,7 @@ import { EntityHeader } from "@/components/folio/entity-header";
 import { StatusBadge } from "@/components/folio/status-badge";
 import { Button } from "@/components/ui/button";
 import { CustomerAvatar } from "@/features/customers/customer-avatar";
+import { CustomerAddressMap } from "@/features/customers/customer-address-map";
 import {
   archiveCustomer,
   restoreCustomer,
@@ -17,6 +18,7 @@ import {
 } from "@/features/invoices/calculations";
 import { invoiceStatusTone } from "@/features/invoices/presentation";
 import type { Customer } from "@/lib/db/types";
+import { countryName } from "@/lib/countries";
 import { formatDate, formatMoney } from "@/lib/format";
 
 type CustomerPageProps = {
@@ -30,7 +32,7 @@ function addressLines(customer: Customer) {
     customer.address_line_1,
     customer.address_line_2,
     [customer.city, customer.region, customer.postal_code].filter(Boolean).join(", "),
-    customer.country_code,
+    countryName(customer.country_code),
   ].filter(Boolean) as string[];
 }
 
@@ -42,6 +44,17 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
 
   const { customer, invoices, summary } = workspace;
   const address = addressLines(customer);
+  const mapLocation = [
+    customer.address_line_1,
+    customer.address_line_2,
+    customer.city,
+    customer.region,
+    customer.postal_code,
+  ].map((part) => part?.trim()).filter(Boolean).join(", ");
+  const mapAddress = [
+    mapLocation,
+    countryName(customer.country_code),
+  ].filter(Boolean).join(", ");
 
   return (
     <div className="w-full space-y-6">
@@ -225,6 +238,9 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
             ) : (
               <p className="mt-3 text-[13px] text-subtle-foreground">No billing address added.</p>
             )}
+            {mapLocation ? (
+              <CustomerAddressMap address={mapAddress} key={`${customer.id}:${mapAddress}`} />
+            ) : null}
           </section>
 
           <section className="border-t p-4">

@@ -24,6 +24,7 @@ import { HorizontalSlidingTabBar } from "@/components/folio/sliding-tab-bar";
 import { StatusBadge } from "@/components/folio/status-badge";
 import { Input } from "@/components/ui/input";
 import { formatDate, formatMoney } from "@/lib/format";
+import { countryName } from "@/lib/countries";
 import {
   buildListHref,
   DEFAULT_LIST_PAGE_LIMIT,
@@ -257,7 +258,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                           {customer.name}
                         </Link>
                         <p className="mt-0.5 text-[12px] text-subtle-foreground">
-                          {customer.country_code ?? "No country added"}
+                          {countryName(customer.country_code) ?? "No country added"}
                         </p>
                       </div>
                     </div>
