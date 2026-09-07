@@ -83,6 +83,12 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
                 </Button>
               </form>
               <DeleteDraftDialog action={deleteDraftInvoiceAction} invoiceId={invoice.id} />
+              <Button asChild className="text-[13px]" variant="outline">
+                <a href={`/api/invoices/${invoice.id}/pdf`}>
+                  <Download aria-hidden="true" className="size-[14px]" />
+                  Download PDF
+                </a>
+              </Button>
               <IssueInvoiceDialog action={issueInvoiceAction} invoiceId={invoice.id} />
             </>
           ) : (
@@ -156,7 +162,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
               <h2 className="text-[14px] font-medium text-foreground">Invoice preview</h2>
               <p className="mt-0.5 text-[12px] text-subtle-foreground">The downloaded PDF uses this same document.</p>
             </div>
-            {invoice.lifecycle === "issued" ? (
+            {invoice.lifecycle !== "void" ? (
               <Button asChild className="rounded-full" size="icon-sm" variant="ghost">
                 <a aria-label="Download invoice PDF" href={`/api/invoices/${invoice.id}/pdf`}>
                   <Download aria-hidden="true" className="size-[14px]" />

@@ -22,12 +22,6 @@ export async function GET(_request: Request, { params }: PdfRouteContext) {
   if (!record) {
     return Response.json({ error: "Invoice not found" }, { status: 404 });
   }
-  if (record.lifecycle === "draft") {
-    return Response.json(
-      { error: "Issue this invoice before downloading its PDF" },
-      { status: 409 },
-    );
-  }
   const { data } = record;
 
   const [{ renderToBuffer }, { InvoicePdfDocument }] = await Promise.all([
