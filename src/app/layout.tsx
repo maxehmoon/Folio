@@ -26,7 +26,7 @@ const themeBootstrap = `
   (() => {
     try {
       const stored = localStorage.getItem("folio-theme");
-      const preference = stored === "light" || stored === "dark" || stored === "system"
+      const preference = stored === "light" || stored === "dark" || stored === "oled" || stored === "system"
         ? stored
         : "light";
       const resolved = preference === "system"
@@ -35,9 +35,9 @@ const themeBootstrap = `
       const root = document.documentElement;
       root.dataset.theme = resolved;
       root.dataset.themePreference = preference;
-      root.style.colorScheme = resolved;
+      root.style.colorScheme = resolved === "light" ? "light" : "dark";
       document.querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", resolved === "dark" ? "#070706" : "#f7f7f5");
+        ?.setAttribute("content", resolved === "oled" ? "#000000" : resolved === "dark" ? "#070706" : "#f7f7f5");
     } catch {
       document.documentElement.dataset.theme = "light";
       document.documentElement.dataset.themePreference = "light";
