@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ChartPoint } from "@/features/reports/range";
+import type { ChartPoint, ReportGranularity } from "@/features/reports/range";
 import { formatDate, formatMoney } from "@/lib/format";
 
 const series = [
@@ -16,7 +16,7 @@ const series = [
   { key: "expensesCents", label: "Expenses", className: "bg-warning" },
 ] as const;
 
-const granularityLabels = { day: "Daily", month: "Monthly", year: "Yearly" };
+const granularityLabels = { day: "Daily", month: "Monthly", year: "Yearly", period: "Multi-year" };
 
 export function ReportCashFlowChart({
   currency,
@@ -25,7 +25,7 @@ export function ReportCashFlowChart({
 }: {
   currency: string;
   points: ChartPoint[];
-  granularity: "day" | "month" | "year";
+  granularity: ReportGranularity;
 }) {
   const titleId = useId();
   const [activeKey, setActiveKey] = useState<string | null>(null);

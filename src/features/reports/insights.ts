@@ -17,8 +17,9 @@ export function buildReportInsights(
   range: DateRange,
   categoriesByExpense: ReadonlyMap<string, string>,
 ) {
-  const { granularity, points } = reportChartBuckets(range);
+  const { granularity, yearsPerBucket, points } = reportChartBuckets(range);
   const keyLength = granularity === "day" ? 10 : granularity === "month" ? 7 : 4;
+  const firstYear = Number(range.from.slice(0, 4));
   const byPeriod = new Map(points.map((point) => [point.key, point]));
   const categoryTotals = new Map<string, number>();
   let invoiceCount = 0;
@@ -32,7 +33,10 @@ export function buildReportInsights(
       entry.baseConversion.status === "missing-rate"
     ) continue;
 
-    const point = byPeriod.get(entry.date.slice(0, keyLength));
+    const key = granularity === "period"
+      ? String(firstYear + Math.floor((Number(entry.date.slice(0, 4)) - firstYear) / yearsPerBucket) * yearsPerBucket).padStart(4, "0")
+      : entry.date.slice(0, keyLength);
+    const point = byPeriod.get(key);
     if (!point) continue;
     const amount = entry.baseConversion.amountCents;
 

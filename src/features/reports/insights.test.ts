@@ -53,14 +53,26 @@ describe("report chart buckets", () => {
     const early = reportChartBuckets({ from: "0099-12-31", to: "0100-01-01" });
     expect(early.points.map(({ label }) => label)).toEqual(["31 Dec 0099", "1 Jan 0100"]);
     const widest = reportChartBuckets({ from: "0000-01-01", to: "9999-12-31" });
-    expect(widest.granularity).toBe("year");
-    expect(widest.points).toHaveLength(10_000);
-    expect(widest.points.at(0)?.label).toBe("0000");
-    expect(widest.points.at(-1)?.label).toBe("9999");
+    expect(widest.granularity).toBe("period");
+    expect(widest.points).toHaveLength(100);
+    expect(widest.points.at(0)?.label).toBe("0000–0099");
+    expect(widest.points.at(-1)?.label).toBe("9900–9999");
   });
 });
 
 describe("report insights", () => {
+  it("preserves amounts and counts across grouped year boundaries", () => {
+    const dates = ["0007-03-01", "0106-12-31", "0107-01-01", "9999-12-31"];
+    const entries = dates.map((date) => syntheticEntry("receipt", date));
+    const result = buildReportInsights(entries, { from: dates[0], to: dates[3] }, new Map());
+    const amounts = entries.map(({ baseConversion }) => baseConversion.status === "converted" ? baseConversion.amountCents : 0);
+    expect(result.points).toHaveLength(100);
+    expect(result.points[0]).toMatchObject({ label: "0007–0106", receiptsCents: amounts[0] + amounts[1] });
+    expect(result.points[1].receiptsCents).toBe(amounts[2]);
+    expect(result.points.at(-1)).toMatchObject({ label: "9907–9999", receiptsCents: amounts[3] });
+    expect(result.receiptCount).toBe(entries.length);
+  });
+
   it("uses converted amounts, keeps empty days and excludes missing rates from totals and counts", () => {
     const sale = syntheticEntry("sale", "2072-02-02");
     const receipt = syntheticEntry("receipt", "2072-02-04");
