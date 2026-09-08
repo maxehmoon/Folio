@@ -46,6 +46,11 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   if (!detail) notFound();
 
   const { invoice } = detail;
+  const historyDateFormatter = new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: business.timezone,
+  });
   const documentData = buildInvoiceDocumentData(detail);
   const payableInvoices: PayableInvoice[] =
     invoice.lifecycle === "issued" &&
@@ -93,6 +98,12 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
             </>
           ) : (
             <>
+              <Button asChild className="text-[13px]" variant="outline">
+                <Link href={`/invoices/${invoice.id}/edit`}>
+                  <Pencil aria-hidden="true" className="size-[14px]" />
+                  Edit
+                </Link>
+              </Button>
               {payableInvoices.length ? (
                 <PaymentDialog
                   action={recordPaymentAction}
@@ -153,6 +164,15 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
         >
           Invoice details
         </a>
+        {detail.revisions?.length ? (
+          <a
+            className="relative z-10 shrink-0 border-b-2 border-transparent px-0.5 pb-2.5 text-[13px] font-medium text-subtle-foreground motion-safe:transition-[color,transform] motion-safe:duration-150 hover:text-muted-foreground motion-safe:active:scale-[0.98]"
+            data-sliding-tab
+            href="#history"
+          >
+            Edit history
+          </a>
+        ) : null}
       </HorizontalSlidingTabBar>
 
       <div className="grid gap-5 min-[1440px]:grid-cols-[minmax(0,1fr)_20rem]">
@@ -197,6 +217,14 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
                 <dt className="text-subtle-foreground">Paid</dt>
                 <dd className="font-medium text-foreground">{formatMoney(detail.paidCents, invoice.currency)}</dd>
               </div>
+              {detail.paidCents > invoice.total_cents ? (
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-warning">Overpaid</dt>
+                  <dd className="font-medium text-warning">
+                    {formatMoney(detail.paidCents - invoice.total_cents, invoice.currency)}
+                  </dd>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-subtle-foreground">Tax</dt>
                 <dd className="font-medium text-foreground">{formatMoney(invoice.tax_cents, invoice.currency)}</dd>
@@ -298,6 +326,33 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
               ) : null}
             </dl>
           </section>
+
+          {detail.revisions?.length ? (
+            <section className="scroll-mt-24 overflow-hidden rounded-[16px] bg-card" id="history">
+              <div className="border-b p-4">
+                <h2 className="text-[14px] font-medium text-foreground">Edit history</h2>
+                <p className="mt-0.5 text-[12px] leading-5 text-subtle-foreground">
+                  Open the version saved before each edit.
+                </p>
+              </div>
+              <div className="divide-y">
+                {detail.revisions.map((revision) => (
+                  <Link
+                    className="block p-4 transition-colors hover:bg-muted/50"
+                    href={`/invoices/${invoice.id}/history/${revision.id}`}
+                    key={revision.id}
+                  >
+                    <p className="text-[13px] font-medium text-foreground">
+                      {revision.invoice_number} · {formatMoney(revision.total_cents, revision.currency)}
+                    </p>
+                    <p className="mt-1 text-[12px] leading-5 text-subtle-foreground">
+                      Before edit by {revision.actor_name} · {historyDateFormatter.format(new Date(revision.created_at))}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </aside>
       </div>
     </div>

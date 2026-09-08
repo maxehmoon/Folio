@@ -17,6 +17,7 @@ const expectedTables = [
   "customers",
   "expenses",
   "invoice_lines",
+  "invoice_revisions",
   "invoices",
   "items",
   "owner_setup_claims",

@@ -35,7 +35,7 @@ function invoiceListQuery(
   const paymentTotals = db
     .selectFrom("payments")
     .select("invoice_id")
-    .select(({ fn }) => fn.sum<number>("amount_cents").as("paid_cents"))
+    .select(sql<number>`sum(coalesce(applied_amount_cents, amount_cents))`.as("paid_cents"))
     .where("business_id", "=", businessId)
     .groupBy("invoice_id")
     .as("payment_totals");
@@ -113,7 +113,7 @@ function toInvoiceListRow(
   return {
     ...record,
     paidCents,
-    balanceDueCents: invoiceBalance(record.total_cents, paidCents),
+    balanceDueCents: record.lifecycle === "void" ? 0 : invoiceBalance(record.total_cents, paidCents),
     status: deriveInvoiceStatus({
       lifecycle: record.lifecycle,
       totalCents: record.total_cents,
@@ -226,7 +226,7 @@ export async function getInvoiceOverview(
   const paymentTotals = db
     .selectFrom("payments")
     .select("invoice_id")
-    .select(({ fn }) => fn.sum<number>("amount_cents").as("paid_cents"))
+    .select(sql<number>`sum(coalesce(applied_amount_cents, amount_cents))`.as("paid_cents"))
     .where("business_id", "=", businessId)
     .groupBy("invoice_id")
     .as("payment_totals");

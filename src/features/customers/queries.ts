@@ -89,7 +89,7 @@ export async function listCustomers(
   const paymentTotals = db
     .selectFrom("payments")
     .select("invoice_id")
-    .select(({ fn }) => fn.sum<number>("amount_cents").as("paid_cents"))
+    .select(sql<number>`sum(coalesce(applied_amount_cents, amount_cents))`.as("paid_cents"))
     .where("business_id", "=", business.id)
     .groupBy("invoice_id")
     .as("payment_totals");

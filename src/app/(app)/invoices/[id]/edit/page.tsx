@@ -24,7 +24,7 @@ function inputDecimal(value: number, scale: number, digits: number) {
 export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
   const [business, { id }] = await Promise.all([requireBusiness(), params]);
   const detail = await getInvoiceDetail(business.id, id);
-  if (!detail || detail.invoice.lifecycle !== "draft") notFound();
+  if (!detail) notFound();
   const options = await getInvoiceEditorOptions(
     business.id,
     { includeCustomerId: detail.invoice.customer_id },
@@ -36,11 +36,13 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
       <PageHeader
         breadcrumbs={[
           { label: "Invoices", href: "/invoices" },
-          { label: "Draft invoice", href: `/invoices/${id}` },
+          { label: detail.invoice.invoice_number ?? "Draft invoice", href: `/invoices/${id}` },
           { label: "Edit" },
         ]}
         title="Edit invoice"
-        description="Changes update this draft’s customer snapshot and totals."
+        description={detail.invoice.lifecycle === "draft"
+          ? "Changes update this draft’s customer snapshot and totals."
+          : "Update this invoice and keep its previous version in edit history."}
       />
 
       <InvoiceEditor
@@ -48,6 +50,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
         baseCurrency={business.currency}
         cancelHref={`/invoices/${id}`}
         customers={options.customers}
+        expectedUpdatedAt={detail.invoice.updated_at}
         initialValues={{
           customerId: detail.invoice.customer_id ?? "",
           currency: detail.invoice.currency,
@@ -75,6 +78,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
         }}
         invoiceId={id}
         items={options.items}
+        publishedEdit={detail.invoice.lifecycle !== "draft"}
       />
     </div>
   );

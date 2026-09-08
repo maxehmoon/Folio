@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,9 +39,11 @@ type InvoiceEditorProps = {
   baseCurrency: string;
   cancelHref: string;
   customers: InvoiceEditorCustomer[];
+  expectedUpdatedAt?: string;
   initialValues: InvoiceEditorInitialValues;
   invoiceId?: string;
   items: InvoiceEditorItem[];
+  publishedEdit?: boolean;
 };
 
 function SubmitButton({ editing }: { editing: boolean }) {
@@ -58,9 +61,11 @@ export function InvoiceEditor({
   baseCurrency,
   cancelHref,
   customers,
+  expectedUpdatedAt,
   initialValues,
   invoiceId,
   items,
+  publishedEdit,
 }: InvoiceEditorProps) {
   const [state, formAction] = useActionState(action, {});
   const lineEditor = useInvoiceLines({
@@ -99,6 +104,7 @@ export function InvoiceEditor({
   return (
     <form action={formAction} className="space-y-4">
       {invoiceId ? <input name="invoiceId" type="hidden" value={invoiceId} /> : null}
+      {expectedUpdatedAt ? <input name="expectedUpdatedAt" type="hidden" value={expectedUpdatedAt} /> : null}
       <input name="lines" type="hidden" value={serialisedLines} />
 
       {state.error ? (
@@ -153,6 +159,14 @@ export function InvoiceEditor({
                 </Link>
               </p>
             ) : null}
+            {publishedEdit && customerId === initialValues.customerId ? (
+              <div className="flex items-start gap-3 pt-1">
+                <Checkbox className="mt-0.5" id="refreshCustomerDetails" name="refreshCustomerDetails" />
+                <Label className="text-[13px] font-normal leading-5 text-muted-foreground" htmlFor="refreshCustomerDetails">
+                  Update customer details from the saved contact
+                </Label>
+              </div>
+            ) : null}
           </div>
           <div className="space-y-2">
             <Label className="text-[13px] text-foreground" htmlFor="issueDate">
@@ -162,6 +176,7 @@ export function InvoiceEditor({
               defaultValue={initialValues.issueDate}
               id="issueDate"
               name="issueDate"
+              required={Boolean(publishedEdit)}
             />
           </div>
           <div className="space-y-2">
@@ -455,6 +470,16 @@ export function InvoiceEditor({
           </CardContent>
         </Card>
       </div>
+
+      {publishedEdit ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+          <Checkbox className="mt-0.5" id="publishedEditConfirmed" name="publishedEditConfirmed" required />
+          <Label className="text-[13px] font-normal leading-5 text-foreground" htmlFor="publishedEditConfirmed">
+            I understand that saving changes this existing invoice, its PDF and the reports
+            it appears in.
+          </Label>
+        </div>
+      ) : null}
 
       <div className="flex items-center justify-end gap-2 pt-2">
         <Button asChild className="rounded-full text-[13px]" variant="ghost">

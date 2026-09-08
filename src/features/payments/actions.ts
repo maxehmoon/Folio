@@ -11,6 +11,7 @@ import {
 } from "@/features/payments/forms";
 import { db, newId, nowIso } from "@/lib/db";
 import { requireBusiness } from "@/lib/session";
+import { paymentExchangeSnapshot } from "./invoice-allocation";
 
 export async function recordPaymentAction(
   _state: PaymentActionState,
@@ -37,7 +38,10 @@ export async function recordPaymentAction(
 
       const invoice = await transaction
         .selectFrom("invoices")
-        .select(["id", "invoice_number", "lifecycle", "currency", "total_cents"])
+        .select([
+          "id", "invoice_number", "lifecycle", "currency", "total_cents",
+          "base_currency", "exchange_rate_micros", "exchange_rate_date", "exchange_rate_source",
+        ])
         .where("id", "=", input.invoiceId)
         .where("business_id", "=", business.id)
         .executeTakeFirst();
@@ -45,10 +49,13 @@ export async function recordPaymentAction(
       if (!invoice || invoice.lifecycle !== "issued") {
         throw new PaymentFormError("Choose an issued invoice");
       }
+      if (input.currency !== invoice.currency) {
+        throw new PaymentFormError("The invoice currency has changed. Refresh the page before recording this payment.");
+      }
 
       const total = await transaction
         .selectFrom("payments")
-        .select(({ fn }) => fn.sum<number>("amount_cents").as("paid_cents"))
+        .select(sql<number>`sum(coalesce(applied_amount_cents, amount_cents))`.as("paid_cents"))
         .where("business_id", "=", business.id)
         .where("invoice_id", "=", invoice.id)
         .executeTakeFirst();
@@ -67,6 +74,8 @@ export async function recordPaymentAction(
           payment_date: input.paymentDate,
           amount_cents: input.amountCents,
           currency: invoice.currency,
+          applied_amount_cents: input.amountCents,
+          ...paymentExchangeSnapshot(invoice),
           method: input.method,
           reference: input.reference,
           notes: input.notes,

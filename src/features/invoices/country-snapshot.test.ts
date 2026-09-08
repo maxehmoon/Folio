@@ -8,7 +8,7 @@ import type { Business, Customer } from "@/lib/db/types";
 import {
   insertInvoiceAggregate,
   prepareInvoiceAggregate,
-  replaceDraftInvoiceAggregate,
+  replaceInvoiceAggregate,
 } from "./aggregate";
 
 const date = new Date(Date.UTC(2024, randomInt(0, 12), randomInt(1, 28)))
@@ -149,7 +149,7 @@ describe("invoice country snapshots", () => {
     await insertInvoiceAggregate(database.db, aggregate);
     for (const [code, lastLine] of [["US", "United States"], [null, "CA"]]) {
       await database.db.transaction().execute((transaction) =>
-        replaceDraftInvoiceAggregate(transaction, aggregateFor(code, aggregate.invoice.id)),
+        replaceInvoiceAggregate(transaction, aggregateFor(code, aggregate.invoice.id), "draft"),
       );
       const record = await documents.getInvoiceDocumentRecord(business, aggregate.invoice.id);
       expect(record?.data.seller.address.at(-1)).toBe(lastLine);
@@ -180,7 +180,11 @@ describe("invoice country snapshots", () => {
     await insertInvoiceAggregate(database.db, aggregate);
     await database.db.schema.alterTable("invoices").dropColumn("seller_country_code").execute();
     await database.db.schema.alterTable("invoices").dropColumn("customer_country_code").execute();
-    await sql`delete from folio_migrations where name = '202609070001_invoice_country_snapshot'`
+    await database.db.schema.dropTable("invoice_revisions").execute();
+    for (const column of ["applied_amount_cents", "base_currency", "exchange_rate_micros", "exchange_rate_date", "exchange_rate_source"]) {
+      await database.db.schema.alterTable("payments").dropColumn(column).execute();
+    }
+    await sql`delete from folio_migrations where name >= '202609070001_invoice_country_snapshot'`
       .execute(database.db);
 
     await database.migrateDatabase();

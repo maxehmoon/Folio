@@ -33,7 +33,7 @@ export function IssueInvoiceDialog({
         <DialogHeader>
           <DialogTitle className="text-[14px]">Issue this invoice?</DialogTitle>
           <DialogDescription>
-            Folio will assign the next invoice number. Issued invoices cannot be edited or deleted.
+            Folio will assign the next invoice number. You can still edit the invoice after issuing it, and previous versions will be kept in edit history.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

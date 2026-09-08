@@ -144,9 +144,10 @@ export async function insertInvoiceAggregate(
   await executor.insertInto("invoice_lines").values(aggregate.lines).execute();
 }
 
-export async function replaceDraftInvoiceAggregate(
+export async function replaceInvoiceAggregate(
   executor: DatabaseExecutor,
   aggregate: PreparedInvoiceAggregate,
+  lifecycle: InvoiceLifecycle,
 ) {
   const invoice = aggregate.invoice;
   const result = await executor
@@ -183,11 +184,11 @@ export async function replaceDraftInvoiceAggregate(
     })
     .where("id", "=", invoice.id)
     .where("business_id", "=", invoice.business_id)
-    .where("lifecycle", "=", "draft")
+    .where("lifecycle", "=", lifecycle)
     .executeTakeFirst();
 
   if (Number(result.numUpdatedRows) !== 1) {
-    throw new InvoiceAggregateConflictError("Only an existing draft can be edited");
+    throw new InvoiceAggregateConflictError("This invoice changed. Refresh the page and try again.");
   }
 
   await executor
