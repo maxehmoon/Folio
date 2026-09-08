@@ -4,7 +4,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, [data-theme="oled"], [data-theme="oled"] *));
 
 :root {
   color-scheme: light;
@@ -54,7 +54,8 @@
   --danger-background: #fdeeee;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-theme="oled"] {
   color-scheme: dark;
   --background: #070706;
   --foreground: #f3f3ef;
@@ -99,6 +100,54 @@
   --warning: #e9bd62;
   --warning-background: #2a2110;
   --danger-background: #2c1514;
+}
+
+[data-theme="oled"] {
+  --background: #000000;
+  --foreground: #e6e6e6;
+  --card: #0a0a0a;
+  --card-foreground: #e6e6e6;
+  --popover: #101010;
+  --popover-foreground: #e6e6e6;
+  --primary: #dedede;
+  --primary-foreground: #000000;
+  --secondary: #161616;
+  --secondary-foreground: #e6e6e6;
+  --muted: #181818;
+  --muted-foreground: #a3a3a3;
+  --subtle-foreground: #949494;
+  --accent: #222222;
+  --accent-foreground: #e6e6e6;
+  --border: #242424;
+  --input: #303030;
+  --ring: #8a8a8a;
+  --chart-1: #dedede;
+  --chart-2: #9e9e9e;
+  --chart-3: #626262;
+  --chart-4: #383838;
+  --chart-5: #242424;
+  --sidebar: #060606;
+  --sidebar-foreground: #e6e6e6;
+  --sidebar-primary: #dedede;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #1e1e1e;
+  --sidebar-accent-foreground: #e6e6e6;
+  --sidebar-border: #242424;
+  --sidebar-ring: #8a8a8a;
+  --surface-subtle: #121212;
+  --field: #161616;
+  --inverse: #121212;
+  --inverse-foreground: #e6e6e6;
+  --success-background: #06110b;
+  --info-background: #060d13;
+  --warning-background: #130f06;
+  --danger-background: #140908;
+}
+
+[data-theme="dark"] [data-sidebar-hover-target][aria-current="page"],
+[data-theme="oled"] [data-sidebar-hover-target][aria-current="page"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
 }
 
 @theme inline {
@@ -296,6 +345,10 @@
     rgb(113 123 255 / 0.14),
     transparent 72%
   );
+}
+
+[data-theme="oled"] .auth-shell-glow {
+  display: none;
 }
 
 @keyframes folio-dashboard-enter {

@@ -9,8 +9,8 @@ import {
   type ReactNode,
 } from "react"
 
-type ThemePreference = "light" | "dark" | "system"
-type ResolvedTheme = "light" | "dark"
+type ThemePreference = "light" | "dark" | "oled" | "system"
+type ResolvedTheme = "light" | "dark" | "oled"
 
 type ThemeContextValue = {
   preference: ThemePreference
@@ -24,7 +24,7 @@ const SERVER_THEME_SNAPSHOT = "light:light"
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function isThemePreference(value: string | null): value is ThemePreference {
-  return value === "light" || value === "dark" || value === "system"
+  return value === "light" || value === "dark" || value === "oled" || value === "system"
 }
 
 function systemTheme(mediaQuery: MediaQueryList): ResolvedTheme {
@@ -37,10 +37,13 @@ function applyTheme(preference: ThemePreference, mediaQuery: MediaQueryList) {
   const root = document.documentElement
   root.dataset.theme = resolved
   root.dataset.themePreference = preference
-  root.style.colorScheme = resolved
+  root.style.colorScheme = resolved === "light" ? "light" : "dark"
   document
     .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-    ?.setAttribute("content", resolved === "dark" ? "#070706" : "#f7f7f5")
+    ?.setAttribute(
+      "content",
+      resolved === "oled" ? "#000000" : resolved === "dark" ? "#070706" : "#f7f7f5",
+    )
   return resolved
 }
 
@@ -50,8 +53,8 @@ function getThemeSnapshot() {
   const preference = isThemePreference(storedPreference)
     ? storedPreference
     : "light"
-  const resolvedTheme =
-    document.documentElement.dataset.theme === "dark" ? "dark" : "light"
+  const theme = document.documentElement.dataset.theme
+  const resolvedTheme = theme === "dark" || theme === "oled" ? theme : "light"
   return `${preference}:${resolvedTheme}`
 }
 

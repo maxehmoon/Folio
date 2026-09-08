@@ -2,6 +2,7 @@
 
 import {
   ChartNoAxesCombined,
+  FullMoon,
   Monitor,
   Package,
 } from "@/components/ui/icons";
@@ -435,6 +436,7 @@ function NavigationLink({
 const themeOptions = [
   { label: "Light", value: "light", icon: Sun03Icon },
   { label: "Dark", value: "dark", icon: Moon02Icon },
+  { label: "OLED", value: "oled", icon: FullMoon },
   { label: "System", value: "system", icon: Monitor },
 ] satisfies readonly {
   icon: NavigationIcon
@@ -449,7 +451,9 @@ function ThemeMenu({
 }) {
   const { preference, resolvedTheme, setPreference } = useTheme()
   const themeIconRef = useRef<AnimatedIconHandle>(null)
-  const ThemeIcon = resolvedTheme === "dark" ? Moon02Icon : Sun03Icon
+  const ThemeIcon = resolvedTheme === "light" ? Sun03Icon : Moon02Icon
+  const themeIconClassName =
+    "size-3.5 shrink-0 motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:scale-110 motion-safe:group-active:scale-95 [&_svg]:size-full"
   const selectedLabel =
     themeOptions.find((option) => option.value === preference)?.label ??
     "Light"
@@ -480,12 +484,16 @@ function ThemeMenu({
           onPointerLeave={stopIconAnimation}
           type="button"
         >
-          <ThemeIcon
-            ref={themeIconRef}
-            aria-hidden="true"
-            className="size-3.5 shrink-0 motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:scale-110 motion-safe:group-active:scale-95 [&_svg]:size-full"
-            size={14}
-          />
+          {resolvedTheme === "oled" ? (
+            <FullMoon aria-hidden="true" className={themeIconClassName} size={14} />
+          ) : (
+            <ThemeIcon
+              ref={themeIconRef}
+              aria-hidden="true"
+              className={themeIconClassName}
+              size={14}
+            />
+          )}
           <span>Appearance</span>
           <span className="ml-auto text-[11px] font-normal text-subtle-foreground">
             {selectedLabel}
