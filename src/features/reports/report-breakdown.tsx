@@ -29,7 +29,7 @@ export function ReportBreakdown({ currency, summary }: ReportBreakdownProps) {
   return (
     <div className="divide-y divide-border">
       {rows.map((row) => (
-        <div key={row.label} className="grid gap-1 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div key={row.label} className="-mx-5 grid gap-1 px-5 py-4 transition-colors duration-150 hover:bg-surface-subtle sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
             <p className="text-[13px] font-medium text-foreground">{row.label}</p>
             <p className="mt-0.5 text-[12px] text-muted-foreground">{row.description}</p>
@@ -39,7 +39,7 @@ export function ReportBreakdown({ currency, summary }: ReportBreakdownProps) {
           </p>
         </div>
       ))}
-      <div className="grid gap-1 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
+      <div className="-mx-5 grid gap-1 px-5 py-4 transition-colors duration-150 hover:bg-surface-subtle sm:grid-cols-[1fr_auto] sm:items-center">
         <div>
           <p className="text-[13px] font-medium text-foreground">Cash net income</p>
           <p className="mt-0.5 text-[12px] text-muted-foreground">Payments received less expenses</p>
