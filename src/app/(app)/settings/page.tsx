@@ -109,7 +109,7 @@ export default async function SettingsPage() {
                 id="countryCode"
                 name="countryCode"
                 options={COUNTRIES.map((country) => ({
-                  description: country.code,
+                  keywords: country.code,
                   label: country.name,
                   value: country.code,
                 }))}

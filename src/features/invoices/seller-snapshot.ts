@@ -13,8 +13,8 @@ export function buildInvoiceSellerSnapshot(business: Business) {
       business.city,
       business.region,
       business.postal_code,
-      business.country_code,
     ]),
+    seller_country_code: business.country_code,
     invoice_footer: business.invoice_footer,
   };
 }

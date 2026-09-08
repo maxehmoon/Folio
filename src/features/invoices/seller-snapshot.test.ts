@@ -1,3 +1,4 @@
+import { randomInt, randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import type { Business } from "@/lib/db";
@@ -5,29 +6,30 @@ import type { Business } from "@/lib/db";
 import { buildInvoiceSellerSnapshot } from "./seller-snapshot";
 
 const business = {
-  name: "Folio Studio",
-  legal_name: "Folio Studio Ltd",
-  email: "billing@folio.test",
-  phone: "+44 20 7946 0000",
-  tax_id: "GB123456789",
-  address_line_1: "1 Market Street",
+  name: `Fictional Studio ${randomUUID()}`,
+  legal_name: `Fictional Company ${randomUUID()}`,
+  email: `${randomUUID()}@example.invalid`,
+  phone: `synthetic-${randomInt(100000, 999999)}`,
+  tax_id: `synthetic-${randomUUID()}`,
+  address_line_1: `${randomInt(1, 999)} Fictional-${randomUUID()} Way`,
   address_line_2: null,
-  city: "London",
+  city: `Imaginary-${randomUUID()}`,
   region: null,
-  postal_code: "EC1 1AA",
-  country_code: "GB",
-  invoice_footer: "Registered in England and Wales.",
+  postal_code: `SYN-${randomInt(1000, 9999)}`,
+  country_code: "CA",
+  invoice_footer: `Fictional footer ${randomUUID()}`,
 } as Business;
 
 describe("buildInvoiceSellerSnapshot", () => {
   it("uses current legal and contact details for a draft invoice", () => {
     expect(buildInvoiceSellerSnapshot(business)).toEqual({
-      seller_name: "Folio Studio Ltd",
-      seller_email: "billing@folio.test",
-      seller_phone: "+44 20 7946 0000",
-      seller_tax_id: "GB123456789",
-      seller_address: "1 Market Street\nLondon\nEC1 1AA\nGB",
-      invoice_footer: "Registered in England and Wales.",
+      seller_name: business.legal_name,
+      seller_email: business.email,
+      seller_phone: business.phone,
+      seller_tax_id: business.tax_id,
+      seller_address: `${business.address_line_1}\n${business.city}\n${business.postal_code}`,
+      seller_country_code: "CA",
+      invoice_footer: business.invoice_footer,
     });
   });
 
@@ -42,8 +44,9 @@ describe("buildInvoiceSellerSnapshot", () => {
         country_code: null,
       }),
     ).toMatchObject({
-      seller_name: "Folio Studio",
+      seller_name: business.name,
       seller_address: null,
+      seller_country_code: null,
     });
   });
 });

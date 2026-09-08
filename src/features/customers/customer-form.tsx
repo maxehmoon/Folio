@@ -345,7 +345,7 @@ export function CustomerForm({ action, cancelHref, customer }: CustomerFormProps
               options={[
                 { label: "No country selected", value: "" },
                 ...COUNTRIES.map((country) => ({
-                  description: country.code,
+                  keywords: country.code,
                   label: country.name,
                   value: country.code,
                 })),

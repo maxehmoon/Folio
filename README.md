@@ -25,9 +25,12 @@
 - Creates drafts and searchable A4 PDF invoices in multiple currencies. Issued invoices retain the customer and seller details used at the time.
 - Records full and partial payments, blocks overpayments, and tracks outstanding and overdue balances.
 - Stores customers, billing addresses and reusable invoice lines.
+- Shows customer address maps after consent, with options to allow once or remember the choice in this browser.
 - Issues invoices from recurring schedules that can be paused and resumed.
 - Records expenses and receipt images, then reports sales, receipts, expenses, cash net income and collections.
 - Exports report data as CSV.
+
+Customer address maps use a Google Maps iframe and need no API key. Folio makes no map requests until the viewer chooses **Allow once** or **Always allow**. Loading a map shares the billing address and the viewer's IP address with Google, which may also use cookies. **Allow once** lasts for the current page visit; **Always allow** is saved in this browser for all customer maps on this Folio installation. Customers without address details beyond a country do not show a map.
 
 ## Run with Docker Compose
 
