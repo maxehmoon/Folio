@@ -69,6 +69,7 @@ export function InvoiceEditor({
     items,
   });
   const [customerId, setCustomerId] = useState(initialValues.customerId);
+  const [exchangeRate, setExchangeRate] = useState(initialValues.exchangeRate);
   const {
     addLine,
     changeCurrency,
@@ -84,10 +85,15 @@ export function InvoiceEditor({
     updateLine,
   } = lineEditor;
 
+  function changeInvoiceCurrency(nextCurrency: string) {
+    if (nextCurrency !== currency) setExchangeRate("");
+    changeCurrency(nextCurrency);
+  }
+
   function changeCustomer(nextCustomerId: string) {
     setCustomerId(nextCustomerId);
     const customer = customers.find((candidate) => candidate.id === nextCustomerId);
-    if (customer?.default_currency) changeCurrency(customer.default_currency);
+    if (customer?.default_currency) changeInvoiceCurrency(customer.default_currency);
   }
 
   return (
@@ -175,7 +181,7 @@ export function InvoiceEditor({
             <SearchableSelect
               id="currency"
               name="currency"
-              onValueChange={changeCurrency}
+              onValueChange={changeInvoiceCurrency}
               options={INVOICE_CURRENCIES.map((option) => ({
                 description: option.name,
                 keywords: option.name,
@@ -189,9 +195,36 @@ export function InvoiceEditor({
             <p className="text-[12px] text-subtle-foreground">
               {currency === baseCurrency
                 ? "Your business reporting currency."
-                : `This invoice will be reported in ${baseCurrency} using a saved reference rate.`}
+                : `This invoice will be reported in ${baseCurrency} using a saved exchange rate.`}
             </p>
           </div>
+          {currency !== baseCurrency ? (
+            <div className="space-y-2 sm:col-span-3">
+              <Label className="text-[13px] text-foreground" htmlFor="exchangeRate">
+                Reporting exchange rate (optional)
+              </Label>
+              <div className="flex items-center gap-3 text-[13px]">
+                <span>1 {currency} =</span>
+                <Input
+                  aria-describedby="exchangeRateHelp"
+                  className="w-40"
+                  id="exchangeRate"
+                  min="0.000001"
+                  name="exchangeRate"
+                  onChange={(event) => setExchangeRate(event.target.value)}
+                  placeholder="Automatic"
+                  step="0.000001"
+                  type="number"
+                  value={exchangeRate}
+                />
+                <span>{baseCurrency}</span>
+              </div>
+              <p className="text-[12px] text-subtle-foreground" id="exchangeRateHelp">
+                Enter a historical rate to preserve it when saving and issuing.
+                Leave blank to use the reference rate for the issue date.
+              </p>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -257,7 +290,7 @@ export function InvoiceEditor({
                   </div>
                   <div className="space-y-1.5 lg:col-span-5">
                     <Label className="text-[12px] text-muted-foreground" htmlFor={`${prefix}-description`}>
-                      Description
+                      Item name
                     </Label>
                     <Input
                       id={`${prefix}-description`}
@@ -265,6 +298,16 @@ export function InvoiceEditor({
                       onChange={(event) => updateLine(line.key, { description: event.target.value })}
                       required
                       value={line.description}
+                    />
+                    <Label className="pt-2 text-[12px] text-muted-foreground" htmlFor={`${prefix}-details`}>
+                      Description (optional)
+                    </Label>
+                    <Textarea
+                      id={`${prefix}-details`}
+                      maxLength={5_000}
+                      onChange={(event) => updateLine(line.key, { details: event.target.value })}
+                      rows={3}
+                      value={line.details ?? ""}
                     />
                   </div>
                   <div className="space-y-1.5 lg:col-span-2">

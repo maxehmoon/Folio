@@ -377,7 +377,7 @@ export function InvoicePdfDocument({
               style={styles.itemRow}
               minPresenceAhead={20 * SCALE}
               key={line.id}
-              wrap={false}
+              wrap={Boolean(line.details)}
             >
               <View style={styles.descriptionColumn}>
                 <Text style={styles.lineTitle}>{line.description}</Text>

@@ -77,6 +77,7 @@ function recurringLines(
     item_id: line.itemId,
     position,
     description: line.description,
+    details: line.details,
     unit: line.unit,
     quantity_thousandths: line.quantityThousandths,
     unit_price_cents: line.unitPriceCents,

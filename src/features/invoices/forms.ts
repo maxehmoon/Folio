@@ -18,6 +18,7 @@ export type SubmittedInvoice = {
   currency: string;
   issueDate: string | null;
   dueDate: string | null;
+  exchangeRateMicros: number | null;
   notes: string | null;
   paymentInstructions: string | null;
   lines: SubmittedInvoiceLine[];
@@ -69,6 +70,32 @@ function parseDate(value: string, label: string, required = false) {
   return trimmed;
 }
 
+function parseExchangeRate(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const match = /^(\d+)(?:\.(\d{1,6}))?$/.exec(trimmed);
+  if (!match) {
+    throw new FormSubmissionError(
+      "Reporting exchange rate must be a positive number with up to 6 decimal places",
+    );
+  }
+  if (trimmed.length > 32) {
+    throw new FormSubmissionError("Reporting exchange rate is too large");
+  }
+
+  const rateMicros = Number(
+    BigInt(match[1]) * 1_000_000n +
+      BigInt((match[2] ?? "").padEnd(6, "0")),
+  );
+  if (!Number.isSafeInteger(rateMicros) || rateMicros <= 0) {
+    throw new FormSubmissionError(
+      "Reporting exchange rate must be positive and within the supported range",
+    );
+  }
+  return rateMicros;
+}
+
 export function parseInvoiceFormData(formData: FormData): SubmittedInvoice {
   const customerId = requiredText(
     readString(formData, "customerId"),
@@ -105,6 +132,7 @@ export function parseInvoiceFormData(formData: FormData): SubmittedInvoice {
     currency,
     issueDate,
     dueDate,
+    exchangeRateMicros: parseExchangeRate(readString(formData, "exchangeRate")),
     notes: optionalText(readString(formData, "notes"), "Notes", 5_000),
     paymentInstructions: optionalText(
       readString(formData, "paymentInstructions"),

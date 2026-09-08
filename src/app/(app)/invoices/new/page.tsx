@@ -44,6 +44,7 @@ export default async function NewInvoicePage({ searchParams }: NewInvoicePagePro
           currency: selectedCustomer?.default_currency ?? business.currency,
           issueDate: today,
           dueDate: addPaymentTerms(today, business.default_payment_terms_days),
+          exchangeRate: "",
           notes: "",
           paymentInstructions: business.payment_instructions ?? "",
           lines: [
@@ -51,6 +52,7 @@ export default async function NewInvoicePage({ searchParams }: NewInvoicePagePro
               key: "new-line-1",
               itemId: null,
               description: "",
+              details: "",
               unit: "each",
               quantity: "1",
               unitPrice: "0.00",

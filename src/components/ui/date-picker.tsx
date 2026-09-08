@@ -98,7 +98,11 @@ function DatePicker({
             </span>
           </button>
         </PopoverTrigger>
-        <PopoverContent aria-label={ariaLabel} id={id ? `${id}-calendar` : undefined}>
+        <PopoverContent
+          aria-label={ariaLabel}
+          className="data-[state=closed]:hidden"
+          id={id ? `${id}-calendar` : undefined}
+        >
           <Calendar
             autoFocus
             defaultMonth={selectedDate ?? new Date()}

@@ -7,6 +7,7 @@ export type InvoiceLineEditorValue = {
   key: string;
   itemId: string | null;
   description: string;
+  details?: string;
   unit: string;
   quantity: string;
   unitPrice: string;
@@ -56,9 +57,10 @@ export function totalEditorLines(lines: readonly InvoiceLineEditorValue[]) {
 
 export function serialiseInvoiceLines(lines: readonly InvoiceLineEditorValue[]) {
   return JSON.stringify(
-    lines.map(({ itemId, description, unit, quantity, unitPrice, taxRate }) => ({
+    lines.map(({ itemId, description, details, unit, quantity, unitPrice, taxRate }) => ({
       itemId,
       description,
+      details,
       unit,
       quantity,
       unitPrice,
@@ -72,6 +74,7 @@ export function emptyInvoiceLine(key: string): InvoiceLineEditorValue {
     key,
     itemId: null,
     description: "",
+    details: "",
     unit: "each",
     quantity: "1",
     unitPrice: "0.00",

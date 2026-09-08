@@ -96,9 +96,8 @@ export function useInvoiceLines({
 
     const update: Partial<InvoiceLineEditorValue> = {
       itemId: item.id,
-      description: item.description?.trim()
-        ? `${item.name} — ${item.description}`
-        : item.name,
+      description: item.name,
+      details: item.description ?? "",
       unit: item.unit,
       taxRate: formatScaledDecimal(item.tax_rate_bps, 2),
     };

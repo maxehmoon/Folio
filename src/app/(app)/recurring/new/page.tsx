@@ -43,6 +43,7 @@ export default async function NewRecurringInvoicePage() {
               key: "new-recurring-line-1",
               itemId: null,
               description: "",
+              details: "",
               unit: "each",
               quantity: "1",
               unitPrice: "0.00",

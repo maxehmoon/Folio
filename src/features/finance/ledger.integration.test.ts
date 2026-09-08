@@ -333,7 +333,11 @@ describe("canonical financial entries", () => {
       "GBP",
       "2026-07-30",
     );
-    expect(result.summary).toEqual({ recentCents: 5_000, totalCents: 6_000 });
+    expect(result.summary).toEqual({
+      recentCents: 9_000,
+      totalCents: 10_000,
+      missingConversionCount: 0,
+    });
   });
 
   it("treats LIKE metacharacters as literal search text", async () => {

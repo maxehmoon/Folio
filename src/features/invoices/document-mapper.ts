@@ -62,7 +62,7 @@ export function buildInvoiceDocumentData(
       ...(invoice.seller_tax_id ? { taxId: invoice.seller_tax_id } : {}),
     },
     customer: {
-      name: invoice.customer_name,
+      name: invoice.customer_billing_name ?? invoice.customer_name,
       address: splitAddress(invoice.customer_address),
       ...(invoice.customer_email ? { email: invoice.customer_email } : {}),
       ...(invoice.customer_phone ? { phone: invoice.customer_phone } : {}),
@@ -75,6 +75,7 @@ export function buildInvoiceDocumentData(
     lines: lines.map((line) => ({
       id: line.id,
       description: line.description,
+      ...(line.details ? { details: line.details } : {}),
       quantity: line.quantity_thousandths / 1_000,
       unit: line.unit,
       unitPrice: line.unit_price_cents,

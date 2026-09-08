@@ -213,6 +213,9 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
 
           <section className="border-t p-4">
             <h2 className="text-[14px] font-medium text-foreground">Billing address</h2>
+            {customer.billing_name ? (
+              <p className="mt-3 text-[13px] font-medium text-foreground">{customer.billing_name}</p>
+            ) : null}
             {address.length ? (
               <address className="mt-3 text-[13px] not-italic leading-5 text-muted-foreground">
                 {address.map((line) => (

@@ -39,6 +39,7 @@ describe("invoice line model", () => {
       {
         itemId: null,
         description: "Design retainer",
+        details: null,
         unit: "month",
         quantityThousandths: 1_250,
         unitPriceCents: 12_000,

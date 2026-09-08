@@ -72,6 +72,7 @@ export default async function EditRecurringInvoicePage({
                 ? line.item_id
                 : null,
             description: line.description,
+            details: line.details ?? "",
             unit: line.unit,
             quantity: formatQuantity(line.quantity_thousandths),
             unitPrice: (line.unit_price_cents / 100).toFixed(2),

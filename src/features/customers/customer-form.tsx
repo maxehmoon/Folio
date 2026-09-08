@@ -35,6 +35,7 @@ type CustomerDefaults = Pick<
   Customer,
   | "id"
   | "name"
+  | "billing_name"
   | "avatar_data_url"
   | "default_currency"
   | "contact_name"
@@ -185,6 +186,23 @@ export function CustomerForm({ action, cancelHref, customer }: CustomerFormProps
               />
             </FormField>
           </div>
+          <FormField
+            className="sm:col-span-2"
+            error={errors.billing_name?.[0]}
+            hint="The organisation or recipient shown on invoices. Leave blank to use the customer name."
+            htmlFor="billing_name"
+            label="Billing name"
+          >
+            <Input
+              {...fieldA11y(errors.billing_name, "billing_name")}
+              aria-describedby={errors.billing_name?.[0] ? "billing_name-error" : "billing_name-hint"}
+              autoComplete="billing organization"
+              defaultValue={value("billing_name", customer?.billing_name)}
+              id="billing_name"
+              maxLength={160}
+              name="billing_name"
+            />
+          </FormField>
           <FormField error={errors.contact_name?.[0]} htmlFor="contact_name" label="Contact name">
             <Input
               {...fieldA11y(errors.contact_name, "contact_name")}
