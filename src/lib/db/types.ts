@@ -273,6 +273,18 @@ export interface InvoicesTable {
   updated_at: string;
 }
 
+export interface InvoiceRevisionsTable {
+  id: string;
+  business_id: string;
+  invoice_id: string;
+  actor_name: string;
+  invoice_number: string | null;
+  currency: string;
+  total_cents: number;
+  snapshot: string;
+  created_at: string;
+}
+
 export interface InvoiceLinesTable {
   id: string;
   business_id: string;
@@ -299,6 +311,11 @@ export interface PaymentsTable {
   payment_date: string;
   amount_cents: number;
   currency: string;
+  applied_amount_cents: ColumnType<number | null, number | null | undefined, number | null>;
+  base_currency: ColumnType<string | null, string | null | undefined, string | null>;
+  exchange_rate_micros: ColumnType<number | null, number | null | undefined, number | null>;
+  exchange_rate_date: ColumnType<string | null, string | null | undefined, string | null>;
+  exchange_rate_source: ColumnType<string | null, string | null | undefined, string | null>;
   method: PaymentMethod;
   reference: string | null;
   notes: string | null;
@@ -349,6 +366,7 @@ export interface Database {
   customers: CustomersTable;
   items: ItemsTable;
   invoices: InvoicesTable;
+  invoice_revisions: InvoiceRevisionsTable;
   invoice_lines: InvoiceLinesTable;
   payments: PaymentsTable;
   expenses: ExpensesTable;
@@ -369,6 +387,7 @@ export type Item = Selectable<ItemsTable>;
 export type NewItem = Insertable<ItemsTable>;
 export type ItemUpdate = Updateable<ItemsTable>;
 export type Invoice = Selectable<InvoicesTable>;
+export type InvoiceRevision = Selectable<InvoiceRevisionsTable>;
 export type NewInvoice = Insertable<InvoicesTable>;
 export type InvoiceUpdate = Updateable<InvoicesTable>;
 export type InvoiceLine = Selectable<InvoiceLinesTable>;

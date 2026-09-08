@@ -6,6 +6,7 @@ function paymentForm(overrides: Record<string, string> = {}): FormData {
   const formData = new FormData();
   const values = {
     invoiceId: "invoice-1",
+    currency: "GBP",
     paymentDate: "2026-07-22",
     amount: "24.50",
     method: "bank_transfer",

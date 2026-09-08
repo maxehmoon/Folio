@@ -90,7 +90,8 @@ export async function getDashboardSummary(
         .execute(),
       db
         .selectFrom("payments")
-        .select(["invoice_id", "amount_cents"])
+        .select("invoice_id")
+        .select(sql<number>`coalesce(applied_amount_cents, amount_cents)`.as("amount_cents"))
         .where("business_id", "=", businessId)
         .execute(),
       db
@@ -167,7 +168,7 @@ export async function getDashboardUpdates(
   const paymentTotals = db
     .selectFrom("payments")
     .select("invoice_id")
-    .select(({ fn }) => fn.sum<number>("amount_cents").as("paid_cents"))
+    .select(sql<number>`sum(coalesce(applied_amount_cents, amount_cents))`.as("paid_cents"))
     .where("business_id", "=", businessId)
     .groupBy("invoice_id")
     .as("payment_totals");

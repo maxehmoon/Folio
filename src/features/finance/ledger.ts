@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 
 import { db, type Database } from "@/lib/db";
 import {
@@ -134,10 +134,10 @@ export async function loadFinancialEntriesWithDatabase(
       "payments.currency",
       "invoices.invoice_number",
       "invoices.customer_name",
-      "invoices.base_currency",
-      "invoices.exchange_rate_micros",
-      "invoices.exchange_rate_date",
-      "invoices.exchange_rate_source",
+      sql<string | null>`case when payments.base_currency is null and payments.currency = invoices.currency then invoices.base_currency else payments.base_currency end`.as("base_currency"),
+      sql<number | null>`case when payments.base_currency is null and payments.currency = invoices.currency then invoices.exchange_rate_micros else payments.exchange_rate_micros end`.as("exchange_rate_micros"),
+      sql<string | null>`case when payments.base_currency is null and payments.currency = invoices.currency then invoices.exchange_rate_date else payments.exchange_rate_date end`.as("exchange_rate_date"),
+      sql<string | null>`case when payments.base_currency is null and payments.currency = invoices.currency then invoices.exchange_rate_source else payments.exchange_rate_source end`.as("exchange_rate_source"),
     ])
     .where("payments.business_id", "=", businessId)
     .where("payments.payment_date", ">=", range.from);

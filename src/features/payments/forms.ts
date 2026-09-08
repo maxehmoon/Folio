@@ -9,6 +9,7 @@ export type PaymentActionState = {
 
 export type SubmittedPayment = {
   invoiceId: string;
+  currency: string;
   paymentDate: string;
   amountCents: number;
   method: PaymentMethod;
@@ -69,6 +70,10 @@ function optionalText(value: string, label: string, maximum: number): string | n
 }
 
 export function parsePaymentFormData(formData: FormData): SubmittedPayment {
+  const currency = readString(formData, "currency").trim();
+  if (!/^[A-Z]{3}$/.test(currency)) {
+    throw new PaymentFormError("Refresh the page and choose an invoice currency");
+  }
   const method = readString(formData, "method") as PaymentMethod;
   if (!PAYMENT_METHODS.has(method)) {
     throw new PaymentFormError("Choose a valid payment method");
@@ -93,6 +98,7 @@ export function parsePaymentFormData(formData: FormData): SubmittedPayment {
 
   return {
     invoiceId: requiredText(readString(formData, "invoiceId"), "Invoice", 100),
+    currency,
     paymentDate,
     amountCents,
     method,

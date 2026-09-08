@@ -98,6 +98,7 @@ export function PaymentDialog({
         </DialogHeader>
 
         <form action={formAction} className="space-y-4">
+          <input name="currency" type="hidden" value={selectedInvoice?.currency ?? ""} />
           {state.error ? (
             <p
               aria-live="polite"

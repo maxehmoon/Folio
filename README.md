@@ -22,7 +22,7 @@
 
 ## What Folio does
 
-- Creates drafts and searchable A4 PDF invoices in multiple currencies. Issued invoices retain the customer and seller details used at the time.
+- Creates drafts and searchable A4 PDF invoices in multiple currencies. Published invoices, including paid and void invoices, can be edited after acknowledging a warning. Previous versions and PDFs remain available in the edit history; edits update the existing invoice and reports. Recorded payments keep their original amounts and currencies.
 - Records full and partial payments, blocks overpayments, and tracks outstanding and overdue balances.
 - Stores customers, billing addresses and reusable invoice lines.
 - Shows customer address maps after consent, with options to allow once or remember the choice in this browser.

@@ -27,7 +27,9 @@ bun run build
 
 For UI changes, check the affected flow in light and dark mode at desktop and narrow viewport widths. Include before/after screenshots when appearance changes.
 
-For database changes, add a forward-only migration and verify both SQLite and PostgreSQL behaviour. The normal test run exercises SQLite. Set `TEST_POSTGRES_DATABASE_URL` to a dedicated PostgreSQL test database to run the same migration contract in an isolated temporary schema. Never rewrite a migration that may already have been deployed.
+For database changes, add a forward-only migration and verify both SQLite and PostgreSQL behaviour. The normal test run exercises SQLite. Set `TEST_POSTGRES_DATABASE_URL` to a dedicated PostgreSQL test database to run the migration contract and invoice editing transactions in isolated temporary schemas. Never rewrite a migration that may already have been deployed.
+
+Use `bun run test --no-file-parallelism` when `TEST_POSTGRES_DATABASE_URL` is set. Kysely discovers migration tables across accessible schemas, so these temporary schema migrations must run one suite at a time.
 
 ## Pull requests
 

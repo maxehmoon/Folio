@@ -7,7 +7,6 @@ import {
   InvoiceAggregateConflictError,
   insertInvoiceAggregate,
   prepareInvoiceAggregate,
-  replaceDraftInvoiceAggregate,
   type InvoiceExchangeSnapshot,
 } from "@/features/invoices/aggregate";
 import {
@@ -17,12 +16,14 @@ import {
   type SubmittedInvoice,
 } from "@/features/invoices/forms";
 import { buildInvoiceSellerSnapshot } from "@/features/invoices/seller-snapshot";
+import { editInvoice } from "@/features/invoices/edits";
+import { PaymentAllocationError } from "@/features/payments/invoice-allocation";
 import { db, newId, nowIso, type Business } from "@/lib/db";
 import { allocateInvoiceNumber } from "@/lib/db/businesses";
 import { getExchangeRate } from "@/lib/exchange-rates";
 import { todayInTimeZone } from "@/lib/format";
 import { addPaymentTerms, convertCents } from "@/lib/finance";
-import { requireBusiness } from "@/lib/session";
+import { requireBusiness, requireSession } from "@/lib/session";
 
 function readId(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -97,6 +98,7 @@ async function exchangeSnapshot(business: Business, input: SubmittedInvoice) {
 function actionError(error: unknown): InvoiceActionState {
   if (error instanceof FormSubmissionError) return { error: error.message };
   if (error instanceof InvoiceAggregateConflictError) return { error: error.message };
+  if (error instanceof PaymentAllocationError) return { error: error.message };
   throw error;
 }
 
@@ -199,14 +201,34 @@ export async function updateInvoiceAction(
   formData: FormData,
 ): Promise<InvoiceActionState> {
   const business = await requireBusiness();
+  const session = await requireSession();
   let invoiceId: string;
 
   try {
     invoiceId = readId(formData, "invoiceId");
     const input = parseInvoiceFormData(formData);
+    const original = await db.selectFrom("invoices").selectAll()
+      .where("id", "=", invoiceId).where("business_id", "=", business.id)
+      .executeTakeFirst();
+    if (!original) throw new FormSubmissionError("This invoice is unavailable");
+    const expectedUpdatedAt = readId(formData, "expectedUpdatedAt");
+    const confirmed = formData.get("publishedEditConfirmed") === "on";
+    if (original.lifecycle !== "draft" && !confirmed) {
+      throw new FormSubmissionError("Acknowledge the warning before saving changes to a published invoice");
+    }
+    const unchangedRate = original.exchange_rate_source === "Manual"
+      ? input.exchangeRateMicros === original.exchange_rate_micros
+      : input.exchangeRateMicros === null;
+    const preserveRate = original.lifecycle !== "draft" && unchangedRate && original.currency === input.currency &&
+      original.issue_date === input.issueDate && original.base_currency === business.currency &&
+      original.exchange_rate_micros && original.exchange_rate_date && original.exchange_rate_source;
     const [customer, exchangeRate] = await Promise.all([
       resolveDraftRelations(business, input),
-      exchangeSnapshot(business, input),
+      preserveRate ? Promise.resolve({
+        base: original.currency, quote: business.currency,
+        rateMicros: original.exchange_rate_micros!,
+        date: original.exchange_rate_date!, source: original.exchange_rate_source!,
+      }) : exchangeSnapshot(business, input),
     ]);
     const timestamp = nowIso();
     const aggregate = prepareDraftAggregate({
@@ -218,16 +240,18 @@ export async function updateInvoiceAction(
       timestamp,
     });
 
-    await db.transaction().execute(async (transaction) => {
-      await replaceDraftInvoiceAggregate(transaction, aggregate);
+    aggregate.invoice.payment_instructions = input.paymentInstructions;
+    await editInvoice(db, business, aggregate, {
+      expectedUpdatedAt,
+      confirmed,
+      refreshCustomerDetails: formData.get("refreshCustomerDetails") === "on",
+      actorName: session.user.name,
     });
   } catch (error) {
     return actionError(error);
   }
 
-  revalidatePath("/invoices");
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect(`/invoices/${invoiceId}`);
 }
 

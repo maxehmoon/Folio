@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 
 import { db, type Database } from "@/lib/db";
 import { listPayableInvoiceRows } from "@/features/invoices/queries";
@@ -67,8 +67,8 @@ export async function listPaymentsWithDatabase(
         "payments.amount_cents",
         "payments.payment_date",
         "payments.currency",
-        "invoices.base_currency",
-        "invoices.exchange_rate_micros",
+        sql<string | null>`case when payments.base_currency is null and payments.currency = invoices.currency then invoices.base_currency else payments.base_currency end`.as("base_currency"),
+        sql<number | null>`case when payments.base_currency is null and payments.currency = invoices.currency then invoices.exchange_rate_micros else payments.exchange_rate_micros end`.as("exchange_rate_micros"),
       ])
       .execute(),
   ]);

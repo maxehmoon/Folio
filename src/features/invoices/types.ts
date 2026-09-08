@@ -2,6 +2,7 @@ import type {
   Customer,
   Invoice,
   InvoiceLine,
+  InvoiceRevision,
   InvoiceStatus,
   Item,
   Payment,
@@ -24,6 +25,7 @@ export type InvoiceListRow = Invoice & {
 };
 
 export type InvoiceDetail = {
+  revisions?: Array<Omit<InvoiceRevision, "snapshot" | "business_id" | "invoice_id">>;
   invoice: Invoice;
   lines: InvoiceLine[];
   payments: Payment[];
