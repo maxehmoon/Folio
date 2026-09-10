@@ -20,6 +20,8 @@
   <img alt="Self-hosted" src="https://img.shields.io/badge/cloud-not%20required-16a34a">
 </p>
 
+![Folio dashboard showing cash flow, outstanding balances and recent invoices](./docs/screenshots/dashboard.png)
+
 ## What Folio does
 
 - Creates drafts and searchable A4 PDF invoices in multiple currencies. Published invoices, including paid and void invoices, can be edited after acknowledging a warning. Previous versions and PDFs remain available in the edit history; edits update the existing invoice and reports. Recorded payments keep their original amounts and currencies.
@@ -31,6 +33,29 @@
 - Exports report data as CSV.
 
 Customer address maps use a Google Maps iframe and need no API key. Folio makes no map requests until the viewer chooses **Allow once** or **Always allow**. Loading a map shares the billing address and the viewer's IP address with Google, which may also use cookies. **Allow once** lasts for the current page visit; **Always allow** is saved in this browser for all customer maps on this Folio installation. Customers without address details beyond a country do not show a map.
+
+## Screenshots
+
+<details>
+<summary><strong>Invoices: preview the document, track payments and download a PDF</strong></summary>
+
+![Invoice workspace with a document preview, billing details, tax totals and payment status](./docs/screenshots/invoice.png)
+
+</details>
+
+<details>
+<summary><strong>Customers: billing details and a complete invoice history</strong></summary>
+
+![Customer workspace showing paid, part-paid and overdue invoices alongside contact details and an address map](./docs/screenshots/customer.png)
+
+</details>
+
+<details>
+<summary><strong>Reports: sales, cash flow and expenses by category</strong></summary>
+
+![Reports showing invoice sales, payments received, monthly cash flow and an expense breakdown](./docs/screenshots/reports.png)
+
+</details>
 
 ## Run with Docker Compose
 
