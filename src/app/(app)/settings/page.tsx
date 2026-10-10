@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
+import { McpAccessSettings } from "@/features/mcp/access-settings";
 import { COUNTRIES } from "@/lib/countries";
 import { INVOICE_CURRENCIES } from "@/lib/currencies";
 import { requireBusiness, requireSession } from "@/lib/session";
@@ -20,6 +21,7 @@ const settingsSections = [
   ["address", "Address"],
   ["defaults", "Invoice defaults"],
   ["account", "Owner account"],
+  ["mcp", "API and MCP access"],
 ] as const;
 
 function Field({
@@ -177,6 +179,7 @@ export default async function SettingsPage() {
           name={session.user.name}
         />
       </SettingsForm>
+      <McpAccessSettings businessId={business.id} />
         </div>
       </div>
     </div>

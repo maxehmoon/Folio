@@ -85,6 +85,18 @@ export interface OwnerSetupClaimsTable {
   claimed_at: string;
 }
 
+export interface McpAccessTokensTable {
+  id: string;
+  business_id: string;
+  label: string;
+  access: "read" | "write";
+  token_hash: string;
+  token_prefix: string;
+  created_at: string;
+  expires_at: string;
+  revoked_at: string | null;
+}
+
 export interface BusinessesTable {
   id: string;
   owner_user_id: string;
@@ -362,6 +374,7 @@ export interface Database {
   auth_verification: AuthVerificationTable;
   auth_rate_limit: AuthRateLimitTable;
   owner_setup_claims: OwnerSetupClaimsTable;
+  mcp_access_tokens: McpAccessTokensTable;
   businesses: BusinessesTable;
   customers: CustomersTable;
   items: ItemsTable;

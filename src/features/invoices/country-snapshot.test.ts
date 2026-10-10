@@ -181,6 +181,7 @@ describe("invoice country snapshots", () => {
     await database.db.schema.alterTable("invoices").dropColumn("seller_country_code").execute();
     await database.db.schema.alterTable("invoices").dropColumn("customer_country_code").execute();
     await database.db.schema.dropTable("invoice_revisions").execute();
+    await database.db.schema.dropTable("mcp_access_tokens").execute();
     for (const column of ["applied_amount_cents", "base_currency", "exchange_rate_micros", "exchange_rate_date", "exchange_rate_source"]) {
       await database.db.schema.alterTable("payments").dropColumn(column).execute();
     }

@@ -20,6 +20,7 @@ const expectedTables = [
   "invoice_revisions",
   "invoices",
   "items",
+  "mcp_access_tokens",
   "owner_setup_claims",
   "payments",
   "recurring_invoice_lines",

@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import type { Database } from "./types";
 import { invoiceEditMigration } from "./invoice-edit-migration";
 import { paymentCurrencyMigration } from "./payment-currency-migration";
+import { mcpMigration } from "./mcp-migration";
 
 const initialDomainMigration: Migration = {
   async up(database) {
@@ -603,6 +604,7 @@ const domainMigrationProvider = {
       },
       "202609070002_payment_currency": paymentCurrencyMigration,
       "202609070003_invoice_edits": invoiceEditMigration,
+      "202610100001_mcp_access_tokens": mcpMigration,
     };
   },
 };

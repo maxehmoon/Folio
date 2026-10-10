@@ -96,9 +96,9 @@ export function businessProfileFormValues(formData: FormData) {
 type BusinessProfileValues = z.output<typeof settingsBusinessProfileSchema>;
 
 export function toBusinessProfileUpdate(
-  profile: BusinessProfileValues,
+  profile: Partial<BusinessProfileValues>,
 ): BusinessProfileUpdate {
-  return {
+  const update: BusinessProfileUpdate = {
     name: profile.name,
     legal_name: profile.legalName,
     email: profile.email,
@@ -117,4 +117,5 @@ export function toBusinessProfileUpdate(
     payment_instructions: profile.paymentInstructions,
     invoice_footer: profile.invoiceFooter,
   };
+  return Object.fromEntries(Object.entries(update).filter(([, value]) => value !== undefined));
 }

@@ -30,6 +30,7 @@
     "@fontsource/geist-sans": "^5.3.0",
     "@hugeicons/core-free-icons": "^4.2.3",
     "@hugeicons/react": "^1.1.9",
+    "@modelcontextprotocol/server": "^2.3.1",
     "@react-pdf/renderer": "^4.5.1",
     "better-auth": "^1.6.24",
     "better-sqlite3": "^13.0.1",
@@ -52,6 +53,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "^2.3.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/better-sqlite3": "^7.6.13",
