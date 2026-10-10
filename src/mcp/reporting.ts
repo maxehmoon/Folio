@@ -250,16 +250,10 @@ export function registerReportingTools(register: ToolRegistrar, context: McpCont
     inputSchema: settingsBusinessProfileSchema.partial().shape,
     idempotent: true,
   }, async (input) => {
-    if (Object.keys(input).length === 0) {
+    const changes = toBusinessProfileUpdate(input);
+    if (Object.keys(changes).length === 0) {
       throw new McpToolError("INVALID_INPUT", "Provide at least one business setting to update.");
     }
-    const business = await currentBusiness(context);
-    const merged = Object.fromEntries(Object.entries({ ...businessSettings(business), ...input })
-      .map(([key, value]) => [key, value ?? ""]));
-    const profile = settingsBusinessProfileSchema.parse(merged);
-    const update = toBusinessProfileUpdate(profile);
-    const changes = Object.fromEntries(Object.entries(update)
-      .filter(([key, value]) => value !== business[key as keyof Business]));
     const updated = await db.updateTable("businesses")
       .set({ ...changes, updated_at: nowIso() })
       .where("id", "=", context.business.id)

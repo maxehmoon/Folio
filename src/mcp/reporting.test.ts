@@ -207,13 +207,29 @@ describe("MCP business settings", () => {
     expect(result).not.toHaveProperty("logo_url");
   });
 
-  it("merges and validates partial settings, clears optional fields and cannot update another tenant", async () => {
+  it("validates supplied settings, clears optional fields and cannot update another tenant", async () => {
     const result = await call("folio_update_business_settings", { name: "  New name  ", phone: "", invoicePrefix: "new" });
     expect(result).toMatchObject({ name: "New name", phone: null, invoicePrefix: "NEW", email: business.email, currency: "GBP" });
     const rows = await database.selectFrom("businesses").selectAll().orderBy("id").execute();
     expect(rows[0]).toMatchObject({ name: "New name", phone: null, owner_user_id: "owner-a", logo_url: business.logo_url, next_invoice_number: 42 });
     expect(rows[1]).toMatchObject({ id: "business-b", name: "Other business", phone: business.phone });
     expect(context.business.name).toBe("New name");
+  });
+
+  it("preserves omitted nullable settings when updating a legacy business without a country", async () => {
+    await database.updateTable("businesses").set({ country_code: null }).where("id", "=", "business-a").execute();
+
+    await expect(call("folio_update_business_settings", { name: "Updated name" })).resolves.toMatchObject({
+      name: "Updated name", countryCode: null, legalName: null, phone: business.phone,
+    });
+
+    expect(await database.selectFrom("businesses").selectAll().where("id", "=", "business-a").executeTakeFirst()).toEqual({
+      ...business, name: "Updated name", country_code: null, updated_at: "2026-03-03T12:00:00.000Z",
+    });
+    await expect(call("folio_update_business_settings", { countryCode: "" })).rejects.toThrow();
+    await expect(call("folio_update_business_settings", { countryCode: " gb " })).resolves.toMatchObject({
+      name: "Updated name", countryCode: "GB",
+    });
   });
 
   it("rejects invalid, empty or privileged settings changes without writing", async () => {

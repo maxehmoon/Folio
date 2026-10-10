@@ -70,4 +70,10 @@ describe("business profile forms", () => {
       postalCode: null,
     });
   });
+
+  it("maps only supplied profile fields and retains explicit null values", () => {
+    expect(toBusinessProfileUpdate({ name: "Updated name", phone: null, countryCode: undefined })).toEqual({
+      name: "Updated name", phone: null,
+    });
+  });
 });
