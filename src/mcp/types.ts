@@ -21,7 +21,7 @@ export type ToolRegistrar = <Shape extends z.ZodRawShape>(
   handler: (input: z.output<z.ZodObject<Shape>>) => Promise<unknown>,
 ) => void;
 
-/** Only intentional domain errors may be shown to an MCP client. */
+/** Only intentional domain errors may be shown to an integration client. */
 export class McpToolError extends Error {
   constructor(public readonly code: string, message: string) {
     super(message);

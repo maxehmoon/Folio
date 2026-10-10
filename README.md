@@ -31,7 +31,7 @@
 - Issues invoices from recurring schedules that can be paused and resumed.
 - Records expenses and receipt images, then reports sales, receipts, expenses, cash net income and collections.
 - Exports report data as CSV.
-- Connects AI assistants through an authenticated MCP endpoint, with read-only or read/write access to business records, reports and invoice PDFs.
+- Connects software through a versioned HTTP API and AI assistants through MCP, with read-only or read/write access to business records, reports and invoice PDFs.
 
 Customer address maps use a Google Maps iframe and need no API key. Folio makes no map requests until the viewer chooses **Allow once** or **Always allow**. Loading a map shares the billing address and the viewer's IP address with Google, which may also use cookies. **Allow once** lasts for the current page visit; **Always allow** is saved in this browser for all customer maps on this Folio installation. Customers without address details beyond a country do not show a map.
 
@@ -216,9 +216,11 @@ Migrations run automatically when the application starts. Take a backup before u
 
 </details>
 
-## Connect an assistant with MCP
+## Connect software and assistants
 
-Folio includes a Streamable HTTP MCP server at `/api/mcp`. In **Settings → MCP access**, create a named access token and choose **Read** or **Read and write**. Copy the token when it is shown; Folio stores only its hash. Tokens expire and can be revoked immediately from Settings.
+Folio includes an HTTP API at `/api/v1` and a Streamable HTTP MCP server at `/api/mcp`. In **Settings → API and MCP access**, create a named access token and choose **Read only** or **Read and write**. Copy the token when it is shown; Folio stores only its hash. The same token works with both interfaces. Tokens expire and can be revoked immediately from Settings.
+
+For scripts and applications, send ordinary HTTP requests with an `Authorization: Bearer YOUR_TOKEN` header. The API covers customers, items, invoices, payments, expenses, recurring billing, reports and business settings, with PDF and CSV downloads. Its authenticated OpenAPI reference is at `/api/v1/openapi.json`. See the [HTTP API guide](./docs/api.md) for the endpoint catalogue and a complete invoicing example.
 
 Configure your MCP client with your Folio URL and an `Authorization: Bearer YOUR_TOKEN` header. Use HTTPS for remote connections. The server supports clients with custom bearer headers; it does not provide an OAuth sign-in flow.
 

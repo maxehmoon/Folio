@@ -29,7 +29,7 @@ function CreatedToken({ token }: { token: string }) {
     <div className="space-y-3 rounded-xl border border-border p-4">
       <p className="text-sm font-medium" role="status">Save your new token. It will not be shown again.</p>
       <Input
-        aria-label="New MCP access token"
+        aria-label="New API and MCP access token"
         autoComplete="off"
         className="font-mono text-xs"
         onFocus={(event) => event.currentTarget.select()}
@@ -83,7 +83,7 @@ export function McpTokenControls({ tokens, now }: { tokens: McpTokenSummary[]; n
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5 sm:col-span-2">
             <Label htmlFor="mcp-label">Connection name</Label>
-            <Input id="mcp-label" maxLength={80} name="label" placeholder="My assistant" required />
+            <Input id="mcp-label" maxLength={80} name="label" placeholder="My integration" required />
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="mcp-access">Access</Label>
@@ -115,7 +115,7 @@ export function McpTokenControls({ tokens, now }: { tokens: McpTokenSummary[]; n
       {state.created ? <CreatedToken key={state.created.id} token={state.created.token} /> : null}
 
       {tokens.length ? (
-        <ul aria-label="MCP connections" className="divide-y divide-border">
+        <ul aria-label="API and MCP connections" className="divide-y divide-border">
           {tokens.map((token) => {
             const expired = token.expires_at <= now;
             const status = token.revoked_at ? "Revoked" : expired ? "Expired" : "Active";

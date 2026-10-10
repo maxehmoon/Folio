@@ -112,7 +112,7 @@ export async function readInvoicePdf(context: McpContext, invoiceId: string, rev
   const document = createElement(InvoicePdfDocument, { data }) as ReactElement<DocumentProps>;
   const buffer = await renderToBuffer(document);
   if (buffer.length > 2 * 1024 * 1024) {
-    throw new McpToolError("RESULT_TOO_LARGE", "This PDF exceeds the 2 MiB MCP download limit. Download it from the Folio invoice page.");
+    throw new McpToolError("RESULT_TOO_LARGE", "This PDF exceeds the 2 MiB integration download limit. Download it from the Folio invoice page.");
   }
   return { filename: pdfFilename(data.number, revisionId), mimeType: "application/pdf", encoding: "base64", data: buffer.toString("base64") };
 }
@@ -171,7 +171,7 @@ export function registerInvoiceTools(register: ToolRegistrar, context: McpContex
       expectedUpdatedAt,
       confirmed: publishedEditConfirmed,
       refreshCustomerDetails,
-      actorName: actor?.name ?? "MCP",
+      actorName: actor?.name ?? "Integration",
     }));
     return boundedDetail(await requireInvoice(context, invoiceId));
   });

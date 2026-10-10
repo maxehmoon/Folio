@@ -6,7 +6,7 @@ import { McpToolError, type McpContext } from "./types";
 
 const guide = {
   product: "Folio",
-  authentication: "Each bearer token grants read or read/write access to one business. Manage tokens in Settings > MCP access.",
+  authentication: "Each bearer token grants read or read/write access to one business. Manage tokens in Settings > API and MCP access. The same token can also be used with the HTTP API at /api/v1.",
   units: {
     money: "Integer hundredths: 1250 means 12.50. Retain the accompanying currency; Folio uses two decimal places for all supported currencies.",
     quantity: "Integer thousandths: 1500 means 1.5 units.",

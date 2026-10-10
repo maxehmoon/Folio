@@ -1,12 +1,12 @@
 # Folio MCP
 
-Folio's Model Context Protocol server lets an assistant read and manage the same business records as the application. It runs inside Folio at `/api/mcp`; there is no separate database connection or service to deploy.
+Folio's Model Context Protocol server lets an assistant read and manage the same business records as the application. It runs inside Folio at `/api/mcp`; there is no separate database connection or service to deploy. Scripts and applications can use the [HTTP API](./api.md) at `/api/v1` with the same access tokens.
 
 ## Connect
 
 1. Start Folio and complete owner and business setup.
-2. Open **Settings → MCP access**.
-3. Create a named token. **Read** is the default; **Read and write** also permits changes to business records. Choose an expiry of 30, 90 or 365 days.
+2. Open **Settings → API and MCP access**.
+3. Create a named token. **Read only** is the default; **Read and write** also permits changes to business records. Choose an expiry of 30, 90 or 365 days.
 4. Copy the token. It is shown once and cannot be recovered; create a replacement if it is lost.
 5. Configure a Streamable HTTP client with `https://your-folio.example/api/mcp` and the header `Authorization: Bearer YOUR_TOKEN`.
 
@@ -33,7 +33,7 @@ This integration uses personal access tokens. It does **not** implement OAuth di
 
 ## Permissions and credentials
 
-Each token belongs to exactly one business. Every request rechecks its hash, expiry and revocation, including requests from an already-connected client. Read tokens advertise only read tools; write tools cannot be called with them. Resources and prompts are available to both access levels.
+Each token belongs to exactly one business and grants its selected access level to both MCP and the HTTP API. Every request rechecks its hash, expiry and revocation, including requests from an already-connected client. Read tokens advertise only read tools; write tools cannot be called with them. Resources and prompts are available to both access levels.
 
 Tokens contain 256 bits of randomness. Only a SHA-256 hash, identifying prefix and management metadata are stored. Revoke a token in Settings to stop subsequent requests; an operation already in progress can finish. Tokens do not expose account passwords, setup secrets, other tokens or access to another business.
 
@@ -84,7 +84,7 @@ Inspect `isError` before using a result. Examples of domain error codes include 
 
 Creation and payment recording are not idempotent. After a timeout or ambiguous failure, check existing records before retrying. Invoice issue uses a transactional draft transition and invoice-number allocation. Recurring execution deduplicates individual occurrences, but repeated catch-up runs can generate more invoices when a previous run reached the existing per-schedule cap. A run is limited to the authenticated business and cannot generate future occurrences beyond its current business date.
 
-The app and MCP share invoice mutation and payment services. Published edits retain revision history and original payment currencies; payment recording preserves the issued-invoice, matching-currency and overpayment checks. Successful mutations invalidate the app's cached views.
+The app, HTTP API and MCP share invoice mutation and payment services. Published edits retain revision history and original payment currencies; payment recording preserves the issued-invoice, matching-currency and overpayment checks. Successful mutations invalidate the app's cached views.
 
 ## Resources and prompts
 

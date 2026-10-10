@@ -1,15 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/server";
 
 import { version } from "../../package.json";
-import { registerCatalogueTools } from "./catalogue";
-import { registerExpenseTools } from "./expenses";
-import { registerInvoiceTools } from "./invoices";
-import { registerPaymentTools } from "./payments";
-import { registerRecurringTools } from "./recurring";
-import { registerReportingTools } from "./reporting";
 import { createToolRegistry } from "./registration";
 import { registerResources } from "./resources";
 import { registerPrompts } from "./prompts";
+import { registerFolioTools } from "./tools";
 import type { McpContext } from "./types";
 
 export function createFolioMcpServer(context: McpContext, onMutation?: () => void) {
@@ -24,12 +19,7 @@ export function createFolioMcpServer(context: McpContext, onMutation?: () => voi
     ].join(" "),
   });
   const { register, read } = createToolRegistry(server, context, onMutation);
-  registerCatalogueTools(register, context);
-  registerExpenseTools(register, context);
-  registerInvoiceTools(register, context);
-  registerPaymentTools(register, context);
-  registerRecurringTools(register, context);
-  registerReportingTools(register, context);
+  registerFolioTools(register, context);
   registerResources(server, context, read);
   registerPrompts(server);
   return server;

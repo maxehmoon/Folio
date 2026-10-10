@@ -27,7 +27,22 @@ async function rpc(page: Page, token: string | null, method: string, params: Rec
   }, { token, method, params });
 }
 
-test("MCP tokens are created once, enforce read/write access and can be revoked", async ({ folio, page }) => {
+async function api(page: Page, token: string | null, path: string, method = "GET", body?: Record<string, unknown>, cookies = false) {
+  return page.evaluate(async ({ token, path, method, body, cookies }) => {
+    const response = await fetch(`/api/v1${path}`, {
+      method,
+      credentials: cookies ? "include" : "omit",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    return { status: response.status, body: await response.json() };
+  }, { token, path, method, body, cookies });
+}
+
+test("API and MCP tokens are created once, enforce read/write access and can be revoked", async ({ folio, page }, testInfo) => {
   await page.goto(`${folio.origin}/setup`);
   await page.getByLabel("Your name").fill("MCP Test Owner");
   await page.getByLabel("Sign-in email").fill("mcp-owner@example.test");
@@ -49,15 +64,16 @@ test("MCP tokens are created once, enforce read/write access and can be revoked"
   await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
 
   await page.goto(`${folio.origin}/settings#mcp`);
+  await expect(page.getByText("API and MCP access", { exact: true })).toHaveCount(2);
   await expect(page.getByRole("combobox", { name: "Access", exact: true })).toHaveText("Read only");
   await expect(page.getByRole("combobox", { name: "Expires after" })).toHaveText("30 days");
   await page.getByLabel("Connection name").fill("Browser reader");
   await page.getByRole("button", { name: "Create access token" }).click();
-  const secret = page.getByLabel("New MCP access token");
+  const secret = page.getByLabel("New API and MCP access token");
   await expect(secret).toBeVisible();
   const readToken = await secret.inputValue();
   expect(readToken).toMatch(/^folio_mcp_[A-Za-z0-9_-]{43}$/);
-  await expect(page.getByRole("list", { name: "MCP connections" })).toContainText("Browser reader");
+  await expect(page.getByRole("list", { name: "API and MCP connections" })).toContainText("Browser reader");
   await page.getByRole("button", { name: "I have saved it" }).click();
   await expect(secret).toHaveCount(0);
   await page.reload();
@@ -80,6 +96,16 @@ test("MCP tokens are created once, enforce read/write access and can be revoked"
     name: "folio_create_customer", arguments: { name: "Forbidden customer" },
   });
   expect(forbidden.body.error).toBeTruthy();
+  expect((await api(page, null, "/customers")).status).toBe(401);
+  expect((await api(page, null, "/customers", "GET", undefined, true)).status).toBe(401);
+  const apiCustomers = await api(page, readToken, "/customers");
+  expect(apiCustomers.status).toBe(200);
+  expect(apiCustomers.body.data.customers).toHaveLength(0);
+  expect((await api(page, readToken, "/customers", "POST", { name: "Forbidden customer" })).status).toBe(403);
+  const openApi = await api(page, readToken, "/openapi.json");
+  expect(openApi.status).toBe(200);
+  expect(openApi.body.openapi).toBe("3.1.1");
+  expect(openApi.body.paths["/customers"].get).toBeTruthy();
 
   await page.getByLabel("Connection name").fill("Browser writer");
   await page.getByRole("combobox", { name: "Access", exact: true }).click();
@@ -90,6 +116,7 @@ test("MCP tokens are created once, enforce read/write access and can be revoked"
   await expect(secret).toBeVisible();
   const writeToken = await secret.inputValue();
   expect(writeToken).not.toBe(readToken);
+  await page.getByRole("button", { name: "I have saved it" }).click();
   const writerTools = await rpc(page, writeToken, "tools/list");
   expect(writerTools.body.result.tools.map((tool: { name: string }) => tool.name)).toContain("folio_create_customer");
   const created = await rpc(page, writeToken, "tools/call", {
@@ -99,12 +126,39 @@ test("MCP tokens are created once, enforce read/write access and can be revoked"
   expect(created.body.result.structuredContent.result.name).toBe("Customer from MCP");
   const customers = await rpc(page, readToken, "tools/call", { name: "folio_list_customers", arguments: {} });
   expect(customers.body.result.structuredContent.result.customers).toHaveLength(1);
+  const apiCreated = await api(page, writeToken, "/customers", "POST", { name: "Customer from API" });
+  expect(apiCreated.status).toBe(201);
+  const apiCustomer = await api(page, readToken, `/customers/${apiCreated.body.data.id}`);
+  expect(apiCustomer.status).toBe(200);
+  expect(apiCustomer.body.data.name).toBe("Customer from API");
 
   await page.getByRole("button", { name: "Revoke Browser reader", exact: true }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Browser reader" })).toContainText("Revoked");
   expect((await rpc(page, readToken, "tools/list")).status).toBe(401);
+  expect((await api(page, readToken, "/customers")).status).toBe(401);
   expect((await rpc(page, writeToken, "tools/list")).status).toBe(200);
   await page.getByRole("button", { name: "Revoke Browser writer", exact: true }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Browser writer" })).toContainText("Revoked");
   expect((await rpc(page, writeToken, "tools/list")).status).toBe(401);
+
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const colorScheme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme });
+      await page.evaluate((theme) => localStorage.setItem("folio-theme", theme), colorScheme);
+      await page.reload();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", colorScheme);
+      const accessPanel = page.locator("#mcp");
+      await accessPanel.scrollIntoViewIfNeeded();
+      await expect(accessPanel.getByText("API and MCP access", { exact: true })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      const screenshotName = `access-settings-${width}-${colorScheme}`;
+      const screenshotPath = testInfo.outputPath(`${screenshotName}.png`);
+      await accessPanel.screenshot({ path: screenshotPath });
+      await testInfo.attach(screenshotName, {
+        path: screenshotPath,
+        contentType: "image/png",
+      });
+    }
+  }
 });

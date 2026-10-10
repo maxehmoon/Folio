@@ -21,7 +21,7 @@ const settingsSections = [
   ["address", "Address"],
   ["defaults", "Invoice defaults"],
   ["account", "Owner account"],
-  ["mcp", "MCP access"],
+  ["mcp", "API and MCP access"],
 ] as const;
 
 function Field({
